@@ -1,4 +1,5 @@
 import { UserButton } from "@clerk/nextjs";
+import Link from "next/link";
 
 export default function LoggedInLayout({
   children,
@@ -8,7 +9,13 @@ export default function LoggedInLayout({
       <header className="flex flex-row items-center justify-between border">
         {/** DESKTOP NAVIGATION */}
         <div className="mx-auto hidden h-24 w-full max-w-7xl items-center justify-between gap-x-6 p-6 sm:flex lg:px-8">
-          <div className="flex items-center gap-x-4">LOGO</div>
+          <div className="flex items-center gap-x-4">
+            <Link href="/dashboard">
+              <h1 className="relative flex select-none flex-row items-baseline text-3xl font-bold">
+                LOGO
+              </h1>
+            </Link>
+          </div>
           <div className="flex items-center gap-x-4">
             <div className="relative h-10 w-10">
               <UserButton
@@ -28,14 +35,16 @@ export default function LoggedInLayout({
         {/** MOBILE NAVIGATION */}
         <div className="mx-auto flex h-16 w-full items-center justify-between gap-x-6 p-4 sm:hidden">
           <div>
-            <h1 className="relative flex select-none flex-row items-baseline text-3xl font-bold">
-              LOGO
-            </h1>
+            <Link href="/dashboard">
+              <h1 className="relative flex select-none flex-row items-baseline text-3xl font-bold">
+                LOGO
+              </h1>
+            </Link>
           </div>
 
           <div className="flex gap-4">
             <button
-              className="focus-visible:ring-ring hover:bg-accent hover:text-accent-foreground hamburger mr-2 flex aspect-square h-9 items-center justify-center rounded-md border-none px-0 py-2 text-sm font-medium shadow-none transition-colors focus-visible:outline-none focus-visible:ring-1 disabled:pointer-events-none disabled:opacity-50 md:hidden"
+              className="hamburger mr-2 flex aspect-square h-9 items-center justify-center rounded-md border-none px-0 py-2 text-sm font-medium shadow-none transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 md:hidden"
               type="button"
               aria-haspopup="dialog"
               aria-expanded="false"

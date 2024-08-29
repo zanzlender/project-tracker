@@ -6,6 +6,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 
 import { TRPCReactProvider } from "~/trpc/react";
 import { cn } from "~/lib/utils";
+import { Toaster } from "~/app/_components/ui/sonner";
 
 const fontSans = FontSans({
   subsets: ["latin"],
@@ -26,9 +27,10 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en" className={`${fontSans.variable}`}>
         <body
-          className={cn("bg-background min-h-screen font-sans antialiased")}
+          className={cn("min-h-screen bg-background font-sans antialiased")}
         >
           <TRPCReactProvider>{children}</TRPCReactProvider>
+          <Toaster />
         </body>
       </html>
     </ClerkProvider>

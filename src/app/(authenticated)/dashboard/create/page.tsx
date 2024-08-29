@@ -1,15 +1,18 @@
-import Link from "next/link";
-import { Button } from "~/app/_components/ui/button";
+import { Suspense } from "react";
+import { CreateProjectForm } from "./_components/create-project-form";
+import Loading from "./loading";
 
 export default async function Dashboard() {
   return (
     <>
-      <div className="flex w-full flex-row items-end justify-between">
-        <h1 className="text-3xl font-medium">Projects</h1>
+      <div className="mx-auto mt-10 flex w-full max-w-xl flex-col items-center justify-start gap-10">
+        <h1 className="text-center text-3xl font-medium">
+          Setup a new project
+        </h1>
 
-        <Link href="/dashboard/create">
-          <Button variant={"default"}>Create new project</Button>
-        </Link>
+        <Suspense fallback={<Loading />}>
+          <CreateProjectForm />
+        </Suspense>
       </div>
     </>
   );

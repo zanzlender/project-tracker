@@ -8,6 +8,7 @@ export default async function Dashboard() {
   if (!userId) return <></>;
 
   const projects = await dto.GetProjects({ userId: userId });
+
   return (
     <>
       <div className="flex w-full flex-col gap-10">
@@ -26,7 +27,7 @@ export default async function Dashboard() {
               return (
                 <ProjectCard
                   key={`project-${project.id}`}
-                  url={`/dashboard/projects/${project.id}`}
+                  url={`/dashboard/${project.id}`}
                   project={project}
                 />
               );
@@ -47,7 +48,7 @@ function ProjectCard({
 }) {
   return (
     <Link href={url}>
-      <div className="flex aspect-video w-full min-w-[300px] max-w-[300px] flex-col rounded-md border shadow-md transition-all duration-200 hover:scale-105">
+      <div className="flex aspect-video w-full min-w-[300px] max-w-[300px] flex-col overflow-hidden rounded-md border shadow-md transition-all duration-200 hover:scale-[102%]">
         <div className="h-24 w-full bg-red-400"></div>
         <div className="relative p-4">
           <p className="overflow-x-hidden overflow-ellipsis text-lg font-semibold">
