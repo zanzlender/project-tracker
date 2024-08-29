@@ -3,7 +3,6 @@
 
 import { sql } from "drizzle-orm";
 import {
-  uuid,
   index,
   pgTableCreator,
   serial,
@@ -24,10 +23,18 @@ import {
 export const createTable = pgTableCreator((name) => `project-tracker_${name}`);
 
 export const users = createTable("users", {
-  id: uuid("id").primaryKey().defaultRandom(),
+  id: text("id")
+    .primaryKey()
+    .$default(() => sql`gen_random_uuid()`),
   name: text("name").notNull(),
-  age: integer("age").notNull(),
-  email: text("email").notNull().unique(),
+  email: text("email").unique(),
+  profileImage: text("profile_image"),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).$onUpdate(
+    () => new Date(),
+  ),
 });
 
 export type InsertUser = typeof users.$inferInsert;
@@ -38,10 +45,12 @@ type Actions = "A" | "B";
 export const projects = createTable(
   "projects",
   {
-    id: uuid("id").primaryKey().defaultRandom(),
+    id: text("id")
+      .primaryKey()
+      .$default(() => sql`gen_random_uuid()`),
     name: varchar("name", { length: 256 }),
     description: text("description").notNull(),
-    authorId: uuid("author_id").references(() => users.id),
+    authorId: text("author_id").references(() => users.id),
     createdAt: timestamp("created_at", { withTimezone: true })
       .default(sql`CURRENT_TIMESTAMP`)
       .notNull(),
@@ -60,8 +69,8 @@ export type SelectProject = typeof projects.$inferSelect;
 export const projects_users = createTable(
   "projects_users",
   {
-    userId: uuid("user_id"),
-    projectId: uuid("project_id"),
+    userId: text("user_id"),
+    projectId: text("project_id"),
     role: text("role").notNull(),
     allowedActions: text("allowed_actions").$type<Actions>().array().notNull(),
   },
