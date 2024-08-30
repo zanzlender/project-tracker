@@ -8,6 +8,41 @@
       "when": 1724957135757,
       "tag": "0000_heavy_star_brand",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1725038549110,
+      "tag": "0001_lucky_the_watchers",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1725053246576,
+      "tag": "0002_wandering_slyde",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1725053926571,
+      "tag": "0003_small_risque",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1725054936271,
+      "tag": "0004_mixed_puppet_master",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1725055002452,
+      "tag": "0005_ancient_kulan_gath",
+      "breakpoints": true
     }
   ]
 }

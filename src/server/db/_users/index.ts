@@ -8,6 +8,7 @@ export async function CreateUser({ user }: { user: InsertUser }) {
     email: user.email,
     name: user.name,
     profileImage: user.profileImage,
+    username: user.username,
   });
 }
 
@@ -47,4 +48,27 @@ export async function DeleteUser({ userId }: { userId: string }) {
   await db.delete(usersTable).where(eq(usersTable.id, userId)).returning();
 
   return true;
+}
+
+export async function checkIfUsernameExists({
+  username,
+}: {
+  username: string;
+}) {
+  const user = await db.query.users.findFirst({
+    where: eq(usersTable.username, username),
+  });
+  return !!user;
+}
+
+export async function GetUserByUsername({ username }: { username: string }) {
+  const user = await db.query.users.findFirst({
+    where: eq(usersTable.username, username),
+    columns: {
+      id: true,
+      profileImage: true,
+      username: true,
+    },
+  });
+  return user;
 }

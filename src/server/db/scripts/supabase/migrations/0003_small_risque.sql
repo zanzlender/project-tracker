@@ -1,0 +1,3 @@
+ALTER TABLE "project-tracker_projects_invites" ADD COLUMN "created_at" timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL;--> statement-breakpoint
+ALTER TABLE "project-tracker_projects_users" ADD COLUMN "created_at" timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL;--> statement-breakpoint
+ALTER TABLE "project-tracker_projects_users" ADD COLUMN "updated_at" timestamp with time zone;

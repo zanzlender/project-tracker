@@ -13,35 +13,39 @@ import {
 } from "~/app/_components/ui/form";
 import { Input } from "~/app/_components/ui/input";
 import { Textarea } from "~/app/_components/ui/textarea";
-import { createProjectSchema } from "~/server/db/zod-schemas/project";
-import { api } from "~/trpc/react";
+import { updateProjectSchema } from "~/server/db/zod-schemas/project";
+import { api, RouterOutputs } from "~/trpc/react";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { type z } from "zod";
+import { revalidatePath } from "next/cache";
 
-export function CreateProjectForm() {
-  const router = useRouter();
+type Project = Required<RouterOutputs["project"]["getProject"]>;
 
-  const createProjectMutation = api.project.createProject.useMutation({
-    onError: ({ message }) => {
-      toast(`❌ Failed to create project... ${message}`);
+export function UpdateProjectForm({ project }: { project: Project }) {
+  const pathname = usePathname();
+
+  const createProjectMutation = api.project.updateProject.useMutation({
+    onError: () => {
+      toast(`❌ Failed to update project...`);
     },
-    onSuccess: (data) => {
-      toast("🎉 New project created!");
-      router.push(`/dashboard/${data?.projectId}`);
+    onSuccess: () => {
+      toast("🎉 Project updated!");
+      revalidatePath(pathname);
     },
   });
 
-  const form = useForm<z.infer<typeof createProjectSchema>>({
-    resolver: zodResolver(createProjectSchema),
+  const form = useForm<z.infer<typeof updateProjectSchema>>({
+    resolver: zodResolver(updateProjectSchema),
     defaultValues: {
-      name: "",
-      description: "",
+      name: project?.name ?? "",
+      description: project?.description ?? "",
     },
   });
 
-  async function onSubmit(values: z.infer<typeof createProjectSchema>) {
+  async function onSubmit(values: z.infer<typeof updateProjectSchema>) {
     createProjectMutation.mutate({
+      id: project?.id ?? "",
       name: values.name,
       description: values.description,
     });
@@ -49,10 +53,9 @@ export function CreateProjectForm() {
 
   return (
     <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(onSubmit)}
-        className="w-full max-w-xl space-y-8"
-      >
+      <form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-4">
+        <span className="text-2xl font-semibold">General </span>
+
         <FormField
           control={form.control}
           name="name"
@@ -83,12 +86,13 @@ export function CreateProjectForm() {
             </FormItem>
           )}
         />
+
         <Button
           className="mt-2 w-full"
           type="submit"
           disabled={createProjectMutation.isPending}
         >
-          {createProjectMutation.isPending ? "Creating..." : "Create project"}
+          {createProjectMutation.isPending ? "Saving..." : "Save changes"}
         </Button>
       </form>
     </Form>

@@ -27,10 +27,16 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en" className={`${fontSans.variable}`}>
         <body
-          className={cn("min-h-screen bg-background font-sans antialiased")}
+          className={cn(
+            "flex min-h-screen flex-col bg-background font-sans antialiased",
+          )}
         >
           <TRPCReactProvider>{children}</TRPCReactProvider>
-          <Toaster />
+          <Toaster
+            toastOptions={{
+              closeButton: true,
+            }}
+          />
         </body>
       </html>
     </ClerkProvider>

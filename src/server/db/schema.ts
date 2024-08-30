@@ -1,7 +1,8 @@
 // Example model schema from the Drizzle docs
 // https://orm.drizzle.team/docs/sql-schema-declaration
 
-import { sql } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
+import { foreignKey } from "drizzle-orm/mysql-core";
 import {
   index,
   pgTableCreator,
@@ -27,6 +28,7 @@ export const users = createTable("users", {
     .primaryKey()
     .$default(() => sql`gen_random_uuid()`),
   name: text("name").notNull(),
+  username: varchar("username", { length: 256 }),
   email: text("email").unique(),
   profileImage: text("profile_image"),
   createdAt: timestamp("created_at", { withTimezone: true })
@@ -36,6 +38,17 @@ export const users = createTable("users", {
     () => new Date(),
   ),
 });
+
+export const usersRelations = relations(users, ({ many }) => ({
+  ownedProjects: many(projects),
+  memberOfProjects: many(projects_users),
+  invitedUsersToProject: many(projects_invites, {
+    relationName: "inviterRelation",
+  }),
+  invitedToProjects: many(projects_invites, {
+    relationName: "inviteeRelation",
+  }),
+}));
 
 export type InsertUser = typeof users.$inferInsert;
 export type SelectUser = typeof users.$inferSelect;
@@ -50,7 +63,7 @@ export const projects = createTable(
       .$default(() => sql`gen_random_uuid()`),
     name: varchar("name", { length: 256 }),
     description: text("description").notNull(),
-    authorId: text("author_id").references(() => users.id),
+    authorId: text("author_id").notNull(),
     createdAt: timestamp("created_at", { withTimezone: true })
       .default(sql`CURRENT_TIMESTAMP`)
       .notNull(),
@@ -63,16 +76,28 @@ export const projects = createTable(
   }),
 );
 
+export const projectsRelations = relations(projects, ({ one, many }) => ({
+  owner: one(users, { fields: [projects.authorId], references: [users.id] }),
+  members: many(projects_users),
+  invites: many(projects_invites),
+}));
+
 export type InsertProject = typeof projects.$inferInsert;
 export type SelectProject = typeof projects.$inferSelect;
 
 export const projects_users = createTable(
   "projects_users",
   {
-    userId: text("user_id"),
-    projectId: text("project_id"),
+    userId: text("user_id").notNull(),
+    projectId: text("project_id").notNull(),
     role: text("role").notNull(),
     allowedActions: text("allowed_actions").$type<Actions>().array().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).$onUpdate(
+      () => new Date(),
+    ),
   },
   (table) => {
     return {
@@ -80,5 +105,48 @@ export const projects_users = createTable(
     };
   },
 );
+
+export const projectsUsersRelations = relations(projects_users, ({ one }) => ({
+  user: one(users, { fields: [projects_users.userId], references: [users.id] }),
+  project: one(projects, {
+    fields: [projects_users.userId],
+    references: [projects.id],
+  }),
+}));
+
 export type InsertProjectUser = typeof projects_users.$inferInsert;
 export type SelectProjectUser = typeof projects_users.$inferSelect;
+
+export const projects_invites = createTable("projects_invites", {
+  id: text("id")
+    .primaryKey()
+    .$default(() => sql`gen_random_uuid()`),
+  inviterId: text("inviter_id").notNull(),
+  inviteeId: text("invitee_id").notNull(),
+  projectId: text("project_id").notNull(),
+  role: text("role").notNull(),
+  allowedActions: text("allowed_actions").$type<Actions>().array().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+});
+
+export const projectsInvitesRelations = relations(
+  projects_invites,
+  ({ one }) => ({
+    inviter: one(users, {
+      fields: [projects_invites.inviterId],
+      references: [users.id],
+      relationName: "inviterRelation",
+    }),
+    invitee: one(users, {
+      fields: [projects_invites.inviteeId],
+      references: [users.id],
+      relationName: "inviteeRelation",
+    }),
+    project: one(projects, {
+      fields: [projects_invites.projectId],
+      references: [projects.id],
+    }),
+  }),
+);

@@ -11,7 +11,7 @@ export default async function Dashboard() {
 
   return (
     <>
-      <div className="flex w-full flex-col gap-10">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-10 p-6 lg:px-8">
         <div className="flex w-full flex-row items-end justify-between">
           <h1 className="text-3xl font-medium">Projects</h1>
           <Link href="/dashboard/create">
@@ -27,7 +27,7 @@ export default async function Dashboard() {
               return (
                 <ProjectCard
                   key={`project-${project.id}`}
-                  url={`/dashboard/${project.id}`}
+                  url={`/dashboard/${project.id}/overview`}
                   project={project}
                 />
               );

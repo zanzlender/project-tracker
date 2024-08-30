@@ -64,6 +64,7 @@ export async function POST(req: NextRequest) {
         email: evt.data.email_addresses[0]?.email_address,
         name: evt.data.first_name + " " + evt.data.last_name,
         profileImage: evt.data.image_url,
+        username: evt.data.username,
       },
     });
   } else if (eventType === "user.updated") {
@@ -73,6 +74,7 @@ export async function POST(req: NextRequest) {
         email: evt.data.email_addresses[0]?.email_address,
         name: evt.data.first_name + " " + evt.data.last_name,
         profileImage: evt.data.image_url,
+        username: evt.data.username,
       },
     });
   } else if (eventType === "user.deleted") {

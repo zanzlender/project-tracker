@@ -1,9 +1,13 @@
 import { UserButton } from "@clerk/nextjs";
 import Link from "next/link";
+import { api } from "~/trpc/server";
+import MobileNavigation from "../_components/mobile-navigation";
 
-export default function LoggedInLayout({
+export default async function LoggedInLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  const projects = await api.project.getProjectsForUser();
+
   return (
     <>
       <header className="flex flex-row items-center justify-between border">
@@ -43,52 +47,18 @@ export default function LoggedInLayout({
           </div>
 
           <div className="flex gap-4">
-            <button
-              className="hamburger mr-2 flex aspect-square h-9 items-center justify-center rounded-md border-none px-0 py-2 text-sm font-medium shadow-none transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 md:hidden"
-              type="button"
-              aria-haspopup="dialog"
-              aria-expanded="false"
-              aria-controls="radix-:r4m:"
-              data-state="closed"
-            >
-              {/* <svg
-                fill="none"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                className="h-6 w-6"
-              >
-                <g>
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M4 6h16"
-                  ></path>
-                </g>
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M4 12h16"
-                ></path>
-                <g>
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M4 18h16"
-                  ></path>
-                </g>
-              </svg> */}
-              X
-            </button>
+            <MobileNavigation
+              projects={projects.map((project) => ({
+                id: project.id,
+                name: project.name ?? "",
+                url: `/dashboard/${project.id}/overview`,
+              }))}
+            />
           </div>
         </div>
       </header>
 
-      <main className="mx-auto h-24 w-full max-w-7xl gap-x-6 p-6 lg:px-8">
+      <main className="relative flex h-full w-full flex-grow flex-col">
         {children}
       </main>
     </>
