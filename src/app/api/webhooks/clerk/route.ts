@@ -4,6 +4,7 @@ import type { WebhookEvent } from "@clerk/nextjs/server";
 import { type NextRequest } from "next/server";
 import { env } from "~/env";
 import dto from "~/server/db/dto";
+import { v4 as uuidV4 } from "uuid";
 
 export async function POST(req: NextRequest) {
   // You can find this in the Clerk Dashboard -> Webhooks -> choose the endpoint
@@ -64,7 +65,7 @@ export async function POST(req: NextRequest) {
         email: evt.data.email_addresses[0]?.email_address,
         name: evt.data.first_name + " " + evt.data.last_name,
         profileImage: evt.data.image_url,
-        username: evt.data.username,
+        username: evt.data.username ?? GenerateRandomUsername(),
       },
     });
   } else if (eventType === "user.updated") {
@@ -74,7 +75,7 @@ export async function POST(req: NextRequest) {
         email: evt.data.email_addresses[0]?.email_address,
         name: evt.data.first_name + " " + evt.data.last_name,
         profileImage: evt.data.image_url,
-        username: evt.data.username,
+        username: evt.data.username ?? GenerateRandomUsername(),
       },
     });
   } else if (eventType === "user.deleted") {
@@ -85,4 +86,9 @@ export async function POST(req: NextRequest) {
   console.log("Webhook body:", body);
 
   return new Response("", { status: 200 });
+}
+
+function GenerateRandomUsername() {
+  const newUuid = uuidV4();
+  return newUuid;
 }

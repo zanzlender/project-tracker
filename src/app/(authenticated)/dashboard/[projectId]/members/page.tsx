@@ -1,6 +1,7 @@
 import { api } from "~/trpc/server";
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
+import { auth } from "@clerk/nextjs/server";
 
 import {
   Table,
@@ -12,10 +13,9 @@ import {
   TableRow,
 } from "~/app/_components/ui/table";
 import InviteUserDialog from "./_components/invite-user";
-
-import MembersActionDropdown from "./_components/members-actions-dropdown";
-import { auth } from "@clerk/nextjs/server";
 import InvitesActionDropdown from "./_components/invites-actions-dropdown";
+import MembersActionDropdown from "./_components/members-actions-dropdown";
+import { revalidatePath } from "next/cache";
 
 export default async function ProjectPage({
   params,
@@ -29,6 +29,8 @@ export default async function ProjectPage({
     .catch(() => {
       redirect("/dashboard");
     });
+
+  revalidatePath("/dashboard");
 
   const { userId } = auth();
   const isUserOwner = project.authorId === userId;
