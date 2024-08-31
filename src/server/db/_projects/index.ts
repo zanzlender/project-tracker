@@ -1,18 +1,57 @@
-import { and, desc, eq } from "drizzle-orm";
+import { and, eq, or } from "drizzle-orm";
 import { db } from "..";
 import {
   projects as projectsTable,
   projects_users as projectsUsersTable,
+  users as usersTable,
   type InsertProject,
 } from "../schema";
 
 export async function GetProjects({ userId }: { userId: string }) {
-  const projects = await db.query.projects.findMany({
-    where: eq(projectsTable.authorId, userId),
-    orderBy: [desc(projectsTable.createdAt)],
-  });
+  const projectsResults = await db
+    .select()
+    .from(projectsTable)
+    .leftJoin(
+      projectsUsersTable,
+      eq(projectsTable.id, projectsUsersTable.projectId),
+    )
+    .where(
+      or(
+        eq(projectsTable.authorId, userId),
+        eq(projectsUsersTable.userId, userId),
+      ),
+    );
 
-  return projects;
+  type GetProjectsReturnType = ((typeof projectsResults)[number]["projects"] & {
+    members: (typeof projectsResults)[number]["projects_users"][];
+  })[];
+
+  const res = projectsResults.reduce((acc, item) => {
+    const { projects, projects_users } = item;
+    const projectId = projects.id;
+
+    const existingProject = acc?.find((project) => project.id === projectId);
+
+    if (existingProject && projects_users) {
+      existingProject.members.push(projects_users);
+    } else {
+      if (projects_users) {
+        acc.push({
+          ...projects,
+          members: [projects_users],
+        });
+      } else {
+        acc.push({
+          ...projects,
+          members: [],
+        });
+      }
+    }
+
+    return acc;
+  }, [] as GetProjectsReturnType);
+
+  return res;
 }
 
 export async function CreateProject({
@@ -98,11 +137,48 @@ export async function CanUserAccessProject({
   }
 
   if (
-    project.authorId !== userId ||
-    project.members.find((member) => member.userId !== userId)
+    project.authorId !== userId &&
+    !project.members.find((member) => member.userId === userId)
   ) {
     return new Error("ACCESS_DENIED");
   }
 
   return project;
+}
+
+// TODO for now only the owner can kick
+export async function KickUserFromProject({
+  username,
+  projectId,
+  kickerId,
+}: {
+  username: string;
+  projectId: string;
+  kickerId: string;
+}) {
+  const project = await db.query.projects.findFirst({
+    where: eq(projectsTable.id, projectId),
+  });
+  if (!project || project.authorId !== kickerId) {
+    throw new Error("NOT_AUTHORIZED");
+  }
+
+  const user = await db.query.users.findFirst({
+    where: eq(usersTable.username, username),
+  });
+  if (!user) {
+    throw new Error("NOT_AUTHORIZED");
+  }
+
+  await db
+    .delete(projectsUsersTable)
+    .where(
+      and(
+        eq(projectsUsersTable.projectId, projectId),
+        eq(projectsUsersTable.userId, user.id),
+      ),
+    )
+    .returning();
+
+  return true;
 }

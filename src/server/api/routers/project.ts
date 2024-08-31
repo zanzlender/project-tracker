@@ -4,8 +4,14 @@ import { eq } from "drizzle-orm";
 import { z } from "zod";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
-import { InviteUserToProject } from "~/server/db/_project_invites";
-import { CanUserAccessProject } from "~/server/db/_projects";
+import {
+  DeleteInvite,
+  InviteUserToProject,
+} from "~/server/db/_project_invites";
+import {
+  CanUserAccessProject,
+  KickUserFromProject,
+} from "~/server/db/_projects";
 import {
   projects as projectsTable,
   projects_users as projectsUsersTable,
@@ -115,5 +121,39 @@ export const projectsRouter = createTRPCRouter({
       }
 
       return true;
+    }),
+
+  kickMemberFromProject: protectedProcedure
+    .input(
+      z.object({
+        username: z.string(),
+        projectId: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const kickUserResponse = await KickUserFromProject({
+        kickerId: ctx.currentUser.id,
+        projectId: input.projectId,
+        username: input.username,
+      });
+
+      return kickUserResponse;
+    }),
+
+  deleteInvite: protectedProcedure
+    .input(
+      z.object({
+        username: z.string(),
+        projectId: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const response = await DeleteInvite({
+        kickerId: ctx.currentUser.id,
+        projectId: input.projectId,
+        username: input.username,
+      });
+
+      return response;
     }),
 });

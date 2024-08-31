@@ -11,8 +11,11 @@ import {
   TableHeader,
   TableRow,
 } from "~/app/_components/ui/table";
-import { Button } from "~/app/_components/ui/button";
 import InviteUserDialog from "./_components/invite-user";
+
+import MembersActionDropdown from "./_components/members-actions-dropdown";
+import { auth } from "@clerk/nextjs/server";
+import InvitesActionDropdown from "./_components/invites-actions-dropdown";
 
 export default async function ProjectPage({
   params,
@@ -26,6 +29,9 @@ export default async function ProjectPage({
     .catch(() => {
       redirect("/dashboard");
     });
+
+  const { userId } = auth();
+  const isUserOwner = project.authorId === userId;
 
   return (
     <>
@@ -48,7 +54,7 @@ export default async function ProjectPage({
                   <TableHead>Status</TableHead>
                   <TableHead>Invited/Member since</TableHead>
                   <TableHead>Role</TableHead>
-                  <TableHead></TableHead>
+                  {isUserOwner && <TableHead></TableHead>}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -62,9 +68,14 @@ export default async function ProjectPage({
                       {member.createdAt.toLocaleTimeString()}
                     </TableCell>
                     <TableCell>{member.role}</TableCell>
-                    <TableCell>
-                      <Button>ACTION</Button>
-                    </TableCell>
+                    {isUserOwner && (
+                      <TableCell>
+                        <MembersActionDropdown
+                          projectId={params.projectId}
+                          username={member.user.username}
+                        />
+                      </TableCell>
+                    )}
                   </TableRow>
                 ))}
 
@@ -77,13 +88,14 @@ export default async function ProjectPage({
                     {project.createdAt.toLocaleDateString()}
                   </TableCell>
                   <TableCell>OWNER</TableCell>
-                  <TableCell>ACTION</TableCell>
+                  {isUserOwner && <TableCell></TableCell>}
                 </TableRow>
               </TableBody>
               <TableFooter>
                 <TableRow>
-                  <TableCell colSpan={4}>Total members</TableCell>
-                  <TableCell>{project.members.length}</TableCell>
+                  <TableCell colSpan={isUserOwner ? 5 : 4}>
+                    Total members: {project.members.length}
+                  </TableCell>
                 </TableRow>
               </TableFooter>
             </Table>
@@ -102,7 +114,7 @@ export default async function ProjectPage({
                   <TableHead>Status</TableHead>
                   <TableHead>Invited at</TableHead>
                   <TableHead>Role</TableHead>
-                  <TableHead></TableHead>
+                  {isUserOwner && <TableHead></TableHead>}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -123,15 +135,23 @@ export default async function ProjectPage({
                         {invite.createdAt.toLocaleDateString()}
                       </TableCell>
                       <TableCell>{invite.role}</TableCell>
-                      <TableCell>ACTION</TableCell>
+                      {isUserOwner && (
+                        <TableCell>
+                          <InvitesActionDropdown
+                            projectId={params.projectId}
+                            username={invite.invitee.username}
+                          />
+                        </TableCell>
+                      )}
                     </TableRow>
                   ))
                 )}
               </TableBody>
               <TableFooter>
                 <TableRow>
-                  <TableCell colSpan={4}>Total invites</TableCell>
-                  <TableCell>{project.invites.length}</TableCell>
+                  <TableCell colSpan={isUserOwner ? 5 : 4}>
+                    Total active invites: {project.invites.length}
+                  </TableCell>
                 </TableRow>
               </TableFooter>
             </Table>

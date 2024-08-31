@@ -2,10 +2,13 @@ import Link from "next/link";
 import { Button } from "~/app/_components/ui/button";
 import { auth } from "@clerk/nextjs/server";
 import dto from "~/server/db/dto";
+import { revalidatePath } from "next/cache";
 
 export default async function Dashboard() {
   const { userId } = auth();
   if (!userId) return <></>;
+
+  revalidatePath("/dashboard");
 
   const projects = await dto.GetProjects({ userId: userId });
 

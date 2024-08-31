@@ -43,6 +43,13 @@
       "when": 1725055002452,
       "tag": "0005_ancient_kulan_gath",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1725101709349,
+      "tag": "0006_optimal_excalibur",
+      "breakpoints": true
     }
   ]
 }

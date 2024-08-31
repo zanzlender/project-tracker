@@ -1,6 +1,6 @@
 "use client";
 
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "~/app/_components/ui/button";
@@ -20,10 +20,8 @@ import { api } from "~/trpc/react";
 export default function InviteUserDialog({ projectId }: { projectId: string }) {
   const [error, setError] = useState<undefined | string>(undefined);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const pathname = usePathname();
   const router = useRouter();
   const [username, setUsername] = useState("");
-  const trpcUtils = api.useUtils();
 
   const checkIfUsernameExists = api.user.checkIfUsernameExists.useMutation({
     onError: () => {
@@ -72,11 +70,11 @@ export default function InviteUserDialog({ projectId }: { projectId: string }) {
       onOpenChange={() => setIsDialogOpen((prev) => !prev)}
     >
       <DialogTrigger asChild>
-        <Button variant="default">Add member</Button>
+        <Button variant="default">Invite member</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle className="mb-2">Add member</DialogTitle>
+          <DialogTitle className="mb-2">Invite members</DialogTitle>
           <DialogDescription>
             Add a new member to this project. An invite will be sent to the
             user.

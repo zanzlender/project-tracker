@@ -1,0 +1,2 @@
+ALTER TABLE "project-tracker_projects_invites" ADD CONSTRAINT "project-tracker_projects_invites_project_id_invitee_id_pk" PRIMARY KEY("project_id","invitee_id");--> statement-breakpoint
+ALTER TABLE "project-tracker_projects_invites" DROP COLUMN IF EXISTS "id";

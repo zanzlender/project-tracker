@@ -28,7 +28,7 @@ export function CreateProjectForm() {
     },
     onSuccess: (data) => {
       toast("🎉 New project created!");
-      router.push(`/dashboard/${data?.projectId}`);
+      router.push(`/dashboard/${data?.projectId}/overview`);
     },
   });
 

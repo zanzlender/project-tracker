@@ -7,7 +7,6 @@ import { DASHBOARD_SIDEBAR_LINKS } from "~/lib/constants";
 
 import { Menu } from "lucide-react";
 import { Button } from "~/app/_components/ui/button";
-import { api } from "~/trpc/react";
 
 export default function LoggedInLayout({
   children,
@@ -29,11 +28,11 @@ export default function LoggedInLayout({
                 const isActiveLink = pathname === item.url;
 
                 return (
-                  <li
-                    key={`sidebar-item-${idx}`}
-                    className={`flex w-full cursor-pointer items-center justify-between px-8 py-3 text-gray-800 transition-all duration-150 ${isActiveLink ? "bg-gray-200 font-semibold" : "hover:bg-amber-400 hover:font-semibold"}`}
-                  >
-                    <Link href={item.url}>
+                  <li key={`sidebar-item-${idx}`}>
+                    <Link
+                      href={item.url}
+                      className={`flex w-full cursor-pointer items-center justify-between px-8 py-3 text-gray-800 transition-all duration-150 ${isActiveLink ? "bg-gray-200 font-semibold" : "hover:bg-amber-400 hover:font-semibold"}`}
+                    >
                       <div className="flex items-center">
                         {item.icon}
                         <span className="ml-2 text-sm">{item.displayName}</span>
@@ -65,11 +64,11 @@ export default function LoggedInLayout({
                 const isActiveLink = pathname === item.url;
 
                 return (
-                  <li
-                    key={`sidebar-item-${idx}`}
-                    className={`flex w-full cursor-pointer items-center justify-between px-8 py-3 text-gray-800 transition-all duration-150 ${isActiveLink ? "bg-gray-200 font-semibold" : "hover:bg-amber-400 hover:font-semibold"}`}
-                  >
-                    <Link href={item.url}>
+                  <li key={`sidebar-item-${idx}`}>
+                    <Link
+                      href={item.url}
+                      className={`flex w-full cursor-pointer items-center justify-between px-8 py-3 text-gray-800 transition-all duration-150 ${isActiveLink ? "bg-gray-200 font-semibold" : "hover:bg-amber-400 hover:font-semibold"}`}
+                    >
                       <div className="flex items-center">
                         {item.icon}
                         <span className="ml-2 text-sm">{item.displayName}</span>
