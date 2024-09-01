@@ -19,10 +19,10 @@ export default function LoggedInLayout({
 
   return (
     <>
-      <div className="flex min-h-full w-full flex-shrink-0 flex-grow flex-col sm:flex-row">
+      <div className="flex h-full min-h-full w-full flex-shrink-0 flex-grow flex-col overflow-x-hidden sm:flex-row">
         <div className="relative flex w-full flex-grow flex-col sm:flex-row">
           {/* DESKTOP SIDEBAR */}
-          <div className="hidden w-72 flex-col justify-between bg-gray-100 shadow sm:relative sm:flex md:h-full">
+          <div className="hidden w-72 shrink-0 flex-col justify-between bg-gray-100 shadow sm:relative sm:flex md:h-full">
             <ul className="mt-12">
               {sidebarItems.map((item, idx) => {
                 const isActiveLink = pathname === item.url;
@@ -80,8 +80,8 @@ export default function LoggedInLayout({
             </ul>
           </div>
 
-          <div className="mx-auto w-full p-6 lg:px-8">
-            <div className="min-h-full w-full overflow-y-auto rounded">
+          <div className="mx-auto h-full w-full overflow-x-hidden p-6 lg:px-8">
+            <div className="h-full min-h-full w-full overflow-y-auto rounded">
               {children}
             </div>
           </div>
