@@ -121,7 +121,7 @@ export const projects_invites = createTable(
     projectId: text("project_id").notNull(),
     inviteeId: text("invitee_id").notNull(),
     inviterId: text("inviter_id").notNull(),
-    role: text("role").notNull(),
+    role: text("role").$type<Roles>().notNull(),
     allowedActions: text("allowed_actions").$type<Actions>().array().notNull(),
     createdAt: timestamp("created_at", { withTimezone: true })
       .default(sql`CURRENT_TIMESTAMP`)

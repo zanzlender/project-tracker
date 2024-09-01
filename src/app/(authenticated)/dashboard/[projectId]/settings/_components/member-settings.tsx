@@ -16,9 +16,9 @@ import {
 import { Input } from "~/app/_components/ui/input";
 import { api } from "~/trpc/react";
 
-const DELETE_PROJECT_PASSPHRASE = "Delete project";
+const DELETE_PROJECT_PASSPHRASE = "Leave project";
 
-export default function DeleteProjectDialog({
+export default function MemberSettings({
   projectId,
   onAfterDelete,
 }: {
@@ -29,19 +29,19 @@ export default function DeleteProjectDialog({
   const inputPassed = input === DELETE_PROJECT_PASSPHRASE;
   const router = useRouter();
 
-  const deleteProjectMutation = api.project.deleteProject.useMutation({
+  const leaveProjectMutation = api.project.leaveProject.useMutation({
     onError: () => {
-      toast("❌ Failed to delete project");
+      toast("❌ Failed to leave project");
     },
     onSuccess: () => {
-      toast("🎉 Project deleted!");
+      toast("🎉 Project left!");
       router.replace("/dashboard");
     },
   });
 
-  const handleDeleteProject = async () => {
+  const handleLeaveProject = async () => {
     if (inputPassed) {
-      deleteProjectMutation.mutate({
+      leaveProjectMutation.mutate({
         projectId: projectId,
       });
     }
@@ -50,22 +50,22 @@ export default function DeleteProjectDialog({
   return (
     <Dialog>
       <DialogTrigger>
-        <Button variant={"destructive"}>Delete projtect</Button>
+        <Button variant={"destructive"}>Leave project</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Delete project</DialogTitle>
+          <DialogTitle>Leave project</DialogTitle>
           <DialogDescription>
-            This action will permanently delete the project! If this action is
-            intended write down{" "}
-            <span className="font-semibold">Delete project</span> in the input
+            This action will permanently remove you from the project! If this
+            action is intended write down{" "}
+            <span className="font-semibold">Leave project</span> in the input
             field below.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <Input
             id="name"
-            placeholder="Delete project"
+            placeholder="Leave project"
             className="col-span-3"
             value={input}
             onChange={(e) => setInput(e.currentTarget.value)}
@@ -76,12 +76,12 @@ export default function DeleteProjectDialog({
         </div>
         <DialogFooter>
           <Button
-            disabled={!inputPassed || deleteProjectMutation.isPending}
+            disabled={!inputPassed || leaveProjectMutation.isPending}
             type="button"
             variant="destructive"
-            onClick={handleDeleteProject}
+            onClick={handleLeaveProject}
           >
-            {deleteProjectMutation.isPending ? "Deleting..." : "Delete project"}
+            {leaveProjectMutation.isPending ? "Leaving..." : "Leave project"}
           </Button>
         </DialogFooter>
       </DialogContent>

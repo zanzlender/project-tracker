@@ -12,6 +12,7 @@ import {
   CanUserAccessProject,
   DeleteProject,
   KickUserFromProject,
+  LeaveProject,
 } from "~/server/db/_projects";
 import {
   projects as projectsTable,
@@ -171,5 +172,20 @@ export const projectsRouter = createTRPCRouter({
       });
 
       return response;
+    }),
+
+  leaveProject: protectedProcedure
+    .input(
+      z.object({
+        projectId: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      await LeaveProject({
+        projectId: input.projectId,
+        userId: ctx.currentUser.id,
+      });
+
+      return true;
     }),
 });

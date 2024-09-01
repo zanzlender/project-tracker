@@ -46,6 +46,7 @@ export default async function Home() {
                 <Button
                   className="w-full min-w-min font-bold"
                   variant={"destructive"}
+                  size={"lg"}
                 >
                   Login
                 </Button>

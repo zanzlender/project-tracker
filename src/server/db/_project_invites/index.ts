@@ -5,7 +5,9 @@ import {
   users as usersTable,
   projects as projectsTable,
   projects_invites as projectInvitesTable,
+  InsertProjectInvites,
 } from "../schema";
+import { AddUserToProject } from "../_projects";
 
 export async function InviteUserToProject({
   username,
@@ -13,13 +15,7 @@ export async function InviteUserToProject({
   inviterId,
   allowedActions,
   role,
-}: {
-  username: string;
-  projectId: string;
-  inviterId: string;
-  role: string;
-  allowedActions: string[];
-}) {
+}: Omit<InsertProjectInvites, "inviteeId" | ""> & { username: string }) {
   const foundUser = await GetUserByUsername({ username });
 
   if (!foundUser) {
@@ -74,4 +70,91 @@ export async function DeleteInvite({
     .returning();
 
   return true;
+}
+
+export async function GetInvitesForUser({ userId }: { userId: string }) {
+  const invites = await db.query.projects_invites.findMany({
+    where: eq(projectInvitesTable.inviteeId, userId),
+    columns: {
+      projectId: true,
+      createdAt: true,
+    },
+    with: {
+      project: {
+        columns: {
+          name: true,
+        },
+      },
+      inviter: {
+        columns: {
+          username: true,
+        },
+      },
+    },
+  });
+
+  return invites;
+}
+
+export async function RejectInvite({
+  userId,
+  projectId,
+}: {
+  userId: string;
+  projectId: string;
+}) {
+  await db
+    .delete(projectInvitesTable)
+    .where(
+      and(
+        eq(projectInvitesTable.inviteeId, userId),
+        eq(projectInvitesTable.projectId, projectId),
+      ),
+    )
+    .returning();
+
+  return true;
+}
+
+export async function AcceptInvite({
+  userId,
+  projectId,
+}: {
+  userId: string;
+  projectId: string;
+}) {
+  const response = await db.transaction(async (tx) => {
+    const invite = await db.query.projects_invites.findFirst({
+      where: and(
+        eq(projectInvitesTable.projectId, projectId),
+        eq(projectInvitesTable.inviteeId, userId),
+      ),
+    });
+    if (!invite) return false;
+
+    const addUser = await AddUserToProject({
+      projectId: projectId,
+      userId: invite.inviteeId,
+      allowedActions: invite.allowedActions,
+      role: invite.role,
+    });
+    if (addUser.length === 0) {
+      tx.rollback();
+      return false;
+    }
+
+    await db
+      .delete(projectInvitesTable)
+      .where(
+        and(
+          eq(projectInvitesTable.inviteeId, userId),
+          eq(projectInvitesTable.projectId, projectId),
+        ),
+      )
+      .returning();
+
+    return true;
+  });
+
+  return response;
 }

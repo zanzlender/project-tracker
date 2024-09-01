@@ -1,6 +1,7 @@
 import { and, eq, or } from "drizzle-orm";
 import { db } from "..";
 import {
+  InsertProjectUser,
   projects as projectsTable,
   projects_users as projectsUsersTable,
   users as usersTable,
@@ -181,4 +182,36 @@ export async function KickUserFromProject({
     .returning();
 
   return true;
+}
+
+export async function AddUserToProject(params: InsertProjectUser) {
+  const response = await db
+    .insert(projectsUsersTable)
+    .values({
+      allowedActions: params.allowedActions,
+      projectId: params.projectId,
+      role: params.role,
+      userId: params.userId,
+    })
+    .returning();
+
+  return response;
+}
+
+export async function LeaveProject({
+  projectId,
+  userId,
+}: {
+  projectId: string;
+  userId: string;
+}) {
+  return await db
+    .delete(projectsUsersTable)
+    .where(
+      and(
+        eq(projectsUsersTable.projectId, projectId),
+        eq(projectsUsersTable.userId, userId),
+      ),
+    )
+    .returning();
 }
