@@ -67,7 +67,7 @@ export default async function ProjectPage({
                     </TableCell>
                     <TableCell>MEMBER</TableCell>
                     <TableCell>
-                      {member.createdAt.toLocaleTimeString()}
+                      {member.createdAt.toLocaleDateString()}
                     </TableCell>
                     <TableCell>{member.role}</TableCell>
                     {isUserOwner && (

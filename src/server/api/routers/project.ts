@@ -10,6 +10,7 @@ import {
 } from "~/server/db/_project_invites";
 import {
   CanUserAccessProject,
+  DeleteProject,
   KickUserFromProject,
 } from "~/server/db/_projects";
 import {
@@ -152,6 +153,21 @@ export const projectsRouter = createTRPCRouter({
         kickerId: ctx.currentUser.id,
         projectId: input.projectId,
         username: input.username,
+      });
+
+      return response;
+    }),
+
+  deleteProject: protectedProcedure
+    .input(
+      z.object({
+        projectId: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const response = await DeleteProject({
+        projectId: input.projectId,
+        userId: ctx.currentUser.id,
       });
 
       return response;

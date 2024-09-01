@@ -2,6 +2,7 @@ import {
   LayoutDashboard,
   SquareChartGantt,
   ClipboardCheck,
+  SettingsIcon,
   Users,
 } from "lucide-react";
 import { type ReactNode } from "react";
@@ -28,6 +29,11 @@ export const DASHBOARD_SIDEBAR_LINKS = (
     icon: <Users />,
     displayName: "Members",
     url: `/dashboard/${projectId}/members`,
+  },
+  {
+    icon: <SettingsIcon />,
+    displayName: "Settings",
+    url: `/dashboard/${projectId}/settings`,
   },
 ];
 
