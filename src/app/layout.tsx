@@ -28,7 +28,7 @@ export default function RootLayout({
       <html lang="en" className={`${fontSans.variable}`}>
         <body
           className={cn(
-            "flex min-h-screen flex-col bg-background font-sans antialiased",
+            "flex min-h-screen w-screen flex-col overflow-x-hidden bg-background font-sans antialiased",
           )}
         >
           <TRPCReactProvider>{children}</TRPCReactProvider>
