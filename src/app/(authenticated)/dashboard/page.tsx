@@ -3,6 +3,7 @@ import { Button } from "~/app/_components/ui/button";
 import { auth } from "@clerk/nextjs/server";
 import dto from "~/server/db/dto";
 import { revalidatePath } from "next/cache";
+import { api } from "~/trpc/server";
 
 export const dynamic = 'force-dynamic'
 
@@ -12,7 +13,7 @@ export default async function Dashboard() {
 
   revalidatePath("/dashboard");
 
-  const projects = await dto.GetProjects({ userId: userId });
+  const projects = await api.project.getProjectsForUser();
 
   return (
     <>
