@@ -14,6 +14,7 @@ export default async function Dashboard() {
   revalidatePath("/dashboard");
 
   const projects = await api.project.getProjectsForUser();
+  void api.project.getProjectsForUser.prefetch();
 
   return (
     <>
@@ -50,7 +51,7 @@ function ProjectCard({
   project,
 }: {
   url: string;
-  project: Awaited<ReturnType<typeof dto.GetProjects>>[number];
+  project: Awaited<ReturnType<typeof api.project.getProjectsForUser>>[number];
 }) {
   return (
     <Link href={url}>
