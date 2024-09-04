@@ -4,6 +4,8 @@ import { auth } from "@clerk/nextjs/server";
 import dto from "~/server/db/dto";
 import { revalidatePath } from "next/cache";
 
+const dynamic = 'force-dynamic'
+
 export default async function Dashboard() {
   const { userId } = auth();
   if (!userId) return <></>;
