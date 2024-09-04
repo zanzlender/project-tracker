@@ -1,6 +1,6 @@
 # Project tracker app
 
-> This project is a Project tracker and planner application developed for the practical task part for my Masters thesis, "Developing web applications in TypeScript".
+> This project is a Project tracker and planner application developed for the practical task part for my Masters thesis, "Developing web applications in TypeScript"
 
 ## Project definition
 
