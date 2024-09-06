@@ -60,7 +60,7 @@ export default async function Home() {
           <div className="mx-auto w-full max-w-7xl text-center">
             <div className="mx-auto flex w-full max-w-4xl flex-col items-center justify-center gap-8">
               <h1 className="text-5xl font-extrabold tracking-tight text-white sm:text-[4rem]">
-                <span className="text-[hsl(280,100%,70%)]">
+                <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
                   Project planner
                 </span>{" "}
                 The Ultimate Tool for your Project&apos;s Success
