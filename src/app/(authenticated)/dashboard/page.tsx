@@ -3,6 +3,7 @@ import { Button } from "~/app/_components/ui/button";
 import { auth } from "@clerk/nextjs/server";
 import dto from "~/server/db/dto";
 import { revalidatePath } from "next/cache";
+import { api } from "~/trpc/server";
 
 export default async function Dashboard() {
   const { userId } = auth();
@@ -10,7 +11,8 @@ export default async function Dashboard() {
 
   revalidatePath("/dashboard");
 
-  const projects = await dto.GetProjects({ userId: userId });
+  const projects = await api.project.getProjectsForUser();
+  void api.project.getProjectsForUser.prefetch();
 
   return (
     <>
@@ -47,7 +49,7 @@ function ProjectCard({
   project,
 }: {
   url: string;
-  project: Awaited<ReturnType<typeof dto.GetProjects>>[number];
+  project: Awaited<ReturnType<typeof api.project.getProjectsForUser>>[number];
 }) {
   return (
     <Link href={url}>
