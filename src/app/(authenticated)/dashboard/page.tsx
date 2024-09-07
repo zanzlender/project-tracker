@@ -1,17 +1,11 @@
 import Link from "next/link";
 import { Button } from "~/app/_components/ui/button";
 import { auth } from "@clerk/nextjs/server";
-import dto from "~/server/db/dto";
-import { revalidatePath } from "next/cache";
 import { api } from "~/trpc/server";
-
-export const dynamic = 'force-dynamic'
 
 export default async function Dashboard() {
   const { userId } = auth();
   if (!userId) return <></>;
-
-  revalidatePath("/dashboard");
 
   const projects = await api.project.getProjectsForUser();
   void api.project.getProjectsForUser.prefetch();

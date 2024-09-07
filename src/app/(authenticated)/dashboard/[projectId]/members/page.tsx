@@ -44,7 +44,7 @@ export default async function ProjectPage({
             <span className="text-2xl font-semibold">Members</span>
 
             <Suspense>
-              <InviteUserDialog projectId={params.projectId} />
+              {isUserOwner && <InviteUserDialog projectId={params.projectId} />}
             </Suspense>
           </div>
 
@@ -67,7 +67,7 @@ export default async function ProjectPage({
                     </TableCell>
                     <TableCell>MEMBER</TableCell>
                     <TableCell>
-                      {member.createdAt.toLocaleTimeString()}
+                      {member.createdAt.toLocaleDateString()}
                     </TableCell>
                     <TableCell>{member.role}</TableCell>
                     {isUserOwner && (
@@ -104,60 +104,59 @@ export default async function ProjectPage({
           </div>
 
           {/** INVITES TABLE */}
-          <div className="flex w-full flex-row items-center justify-between">
-            <span className="text-2xl font-semibold">Invites</span>
-          </div>
+          {isUserOwner && (
+            <>
+              <div className="flex w-full flex-row items-center justify-between">
+                <span className="text-2xl font-semibold">Invites</span>
+              </div>
 
-          <div className="w-full rounded-md border">
-            <Table className="w-full">
-              <TableHeader>
-                <TableRow>
-                  <TableHead>User</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Invited at</TableHead>
-                  <TableHead>Role</TableHead>
-                  {isUserOwner && <TableHead></TableHead>}
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {project.invites.length === 0 ? (
-                  <TableRow>
-                    <TableCell className="text-center" colSpan={5}>
-                      No invites sent yet.
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  project.invites.map((invite) => (
-                    <TableRow key={invite.inviteeId}>
-                      <TableCell className="font-medium">
-                        {invite.invitee.name}
-                      </TableCell>
-                      <TableCell>INVITED</TableCell>
-                      <TableCell>
-                        {invite.createdAt.toLocaleDateString()}
-                      </TableCell>
-                      <TableCell>{invite.role}</TableCell>
-                      {isUserOwner && (
-                        <TableCell>
-                          <InvitesActionDropdown
-                            projectId={params.projectId}
-                            username={invite.invitee.username}
-                          />
-                        </TableCell>
-                      )}
+              <div className="w-full rounded-md border">
+                <Table className="w-full">
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>User</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Invited at</TableHead>
+                      <TableHead>Role</TableHead>
+                      <TableHead></TableHead>
                     </TableRow>
-                  ))
-                )}
-              </TableBody>
-              <TableFooter>
-                <TableRow>
-                  <TableCell colSpan={isUserOwner ? 5 : 4}>
-                    Total active invites: {project.invites.length}
-                  </TableCell>
-                </TableRow>
-              </TableFooter>
-            </Table>
-          </div>
+                  </TableHeader>
+                  <TableBody>
+                    {project.invites.length === 0 ? (
+                      <TableRow>
+                        <TableCell className="text-center" colSpan={5}>
+                          No invites sent yet.
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      project.invites.map((invite) => (
+                        <TableRow key={invite.inviteeId}>
+                          <TableCell className="font-medium">
+                            {invite.invitee.name}
+                          </TableCell>
+                          <TableCell>INVITED</TableCell>
+                          <TableCell>
+                            {invite.createdAt.toLocaleDateString()}
+                          </TableCell>
+                          <TableCell>{invite.role}</TableCell>
+                          <TableCell>
+                            <InvitesActionDropdown inviteId={invite.id} />
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                  <TableFooter>
+                    <TableRow>
+                      <TableCell colSpan={5}>
+                        Total active invites: {project.invites.length}
+                      </TableCell>
+                    </TableRow>
+                  </TableFooter>
+                </Table>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </>

@@ -5,7 +5,9 @@ import {
   users as usersTable,
   projects as projectsTable,
   projects_invites as projectInvitesTable,
+  InsertProjectInvites,
 } from "../schema";
+import { AddUserToProject } from "../_projects";
 
 export async function InviteUserToProject({
   username,
@@ -13,13 +15,7 @@ export async function InviteUserToProject({
   inviterId,
   allowedActions,
   role,
-}: {
-  username: string;
-  projectId: string;
-  inviterId: string;
-  role: string;
-  allowedActions: string[];
-}) {
+}: Omit<InsertProjectInvites, "inviteeId" | ""> & { username: string }) {
   const foundUser = await GetUserByUsername({ username });
 
   if (!foundUser) {
@@ -40,38 +36,106 @@ export async function InviteUserToProject({
 }
 
 export async function DeleteInvite({
-  username,
-  projectId,
+  inviteId,
   kickerId,
 }: {
-  username: string;
-  projectId: string;
+  inviteId: string;
   kickerId: string;
 }) {
-  const project = await db.query.projects.findFirst({
-    where: eq(projectsTable.id, projectId),
-  });
-  if (!project || project.authorId !== kickerId) {
-    throw new Error("NOT_AUTHORIZED");
-  }
+  // TODO check if user can kick
 
-  const user = await db.query.users.findFirst({
-    where: eq(usersTable.username, username),
-  });
-  if (!user) {
-    throw new Error("NOT_AUTHORIZED");
-  }
+  await db
+    .delete(projectInvitesTable)
+    .where(eq(projectInvitesTable.id, inviteId))
+    .returning();
 
+  return true;
+}
+
+export async function GetInvitesForUser({ userId }: { userId: string }) {
+  const invites = await db.query.projects_invites.findMany({
+    where: eq(projectInvitesTable.inviteeId, userId),
+    columns: {
+      id: true,
+      projectId: true,
+      createdAt: true,
+    },
+    with: {
+      project: {
+        columns: {
+          name: true,
+        },
+      },
+      inviter: {
+        columns: {
+          username: true,
+        },
+      },
+    },
+  });
+
+  return invites;
+}
+
+export async function RejectInvite({
+  inviteId,
+  userId,
+}: {
+  inviteId: string;
+  userId: string;
+}) {
   await db
     .delete(projectInvitesTable)
     .where(
       and(
-        eq(projectInvitesTable.projectId, projectId),
-        eq(projectInvitesTable.inviterId, kickerId),
-        eq(projectInvitesTable.inviteeId, user.id),
+        eq(projectInvitesTable.inviteeId, userId),
+        eq(projectInvitesTable.id, inviteId),
       ),
     )
     .returning();
 
   return true;
+}
+
+export async function AcceptInvite({
+  userId,
+  inviteId,
+}: {
+  userId: string;
+  inviteId: string;
+}) {
+  const response = await db.transaction(async (tx) => {
+    const invite = await db.query.projects_invites.findFirst({
+      where: and(
+        eq(projectInvitesTable.id, inviteId),
+        eq(projectInvitesTable.inviteeId, userId),
+      ),
+    });
+    if (!invite) return false;
+
+    const addUser = await AddUserToProject({
+      projectId: invite.projectId,
+      userId: invite.inviteeId,
+      allowedActions: invite.allowedActions,
+      role: invite.role,
+    });
+    if (addUser.length === 0) {
+      tx.rollback();
+      return false;
+    }
+
+    await db
+      .delete(projectInvitesTable)
+      .where(
+        and(
+          eq(projectInvitesTable.inviteeId, userId),
+          eq(projectInvitesTable.id, inviteId),
+        ),
+      )
+      .returning();
+
+    return true;
+  });
+
+  return response;
 }

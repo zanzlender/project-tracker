@@ -80,10 +80,8 @@ export default function LoggedInLayout({
             </ul>
           </div>
 
-          <div className="mx-auto h-full w-full overflow-x-hidden p-6 lg:px-8">
-            <div className="h-full min-h-full w-full overflow-y-auto rounded">
-              {children}
-            </div>
+          <div className="relative mx-auto h-full w-full overflow-y-auto overflow-x-hidden p-6 lg:px-8">
+            {children}
           </div>
         </div>
       </div>

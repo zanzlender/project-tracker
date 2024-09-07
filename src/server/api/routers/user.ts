@@ -1,19 +1,8 @@
-import { auth } from "@clerk/nextjs/server";
-import { TRPCError } from "@trpc/server";
-import { eq } from "drizzle-orm";
 import { z } from "zod";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
-import { CanUserAccessProject } from "~/server/db/_projects";
 import { checkIfUsernameExists } from "~/server/db/_users";
-import {
-  projects as projectsTable,
-  projects_users as projectsUsersTable,
-} from "~/server/db/schema";
-import {
-  createProjectSchema,
-  updateProjectSchema,
-} from "~/server/db/zod-schemas/project";
+import dto from "~/server/db/dto";
 
 export const usersRouter = createTRPCRouter({
   checkIfUsernameExists: protectedProcedure
@@ -28,4 +17,9 @@ export const usersRouter = createTRPCRouter({
       });
       return usernameExists;
     }),
+
+  getCurrentUserData: protectedProcedure.query(async ({ ctx }) => {
+    const userData = await dto.GetUserById(ctx.currentUser.id);
+    return userData;
+  }),
 });

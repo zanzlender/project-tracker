@@ -2,6 +2,8 @@ import { UserButton } from "@clerk/nextjs";
 import Link from "next/link";
 import { api } from "~/trpc/server";
 import MobileNavigation from "../_components/mobile-navigation";
+import { Suspense } from "react";
+import Notifications from "../_components/notifications";
 
 export default async function LoggedInLayout({
   children,
@@ -16,11 +18,14 @@ export default async function LoggedInLayout({
           <div className="flex items-center gap-x-4">
             <Link href="/dashboard">
               <h1 className="relative flex select-none flex-row items-baseline text-3xl font-bold">
-                LOGO
+                ProjectPlanner
               </h1>
             </Link>
           </div>
           <div className="flex items-center gap-x-4">
+            <Suspense>
+              <Notifications key={"desktop-notifications-1"} />
+            </Suspense>
             <div className="relative h-10 w-10">
               <UserButton
                 appearance={{
@@ -41,12 +46,15 @@ export default async function LoggedInLayout({
           <div>
             <Link href="/dashboard">
               <h1 className="relative flex select-none flex-row items-baseline text-3xl font-bold">
-                LOGO
+                ProjectPlanner
               </h1>
             </Link>
           </div>
 
           <div className="flex gap-4">
+            <Suspense>
+              <Notifications key={"desktop-notifications-2"} />
+            </Suspense>
             <MobileNavigation
               projects={projects.map((project) => ({
                 id: project.id,

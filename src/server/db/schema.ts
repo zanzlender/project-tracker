@@ -1,6 +1,7 @@
 // Example model schema from the Drizzle docs
 // https://orm.drizzle.team/docs/sql-schema-declaration
 
+import { create } from "domain";
 import { relations, sql } from "drizzle-orm";
 import {
   index,
@@ -9,6 +10,8 @@ import {
   varchar,
   text,
   primaryKey,
+  json,
+  serial,
 } from "drizzle-orm/pg-core";
 
 /**
@@ -44,6 +47,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   invitedToProjects: many(projects_invites, {
     relationName: "inviteeRelation",
   }),
+  createdTasks: many(project_tasks),
 }));
 
 export type InsertUser = typeof users.$inferInsert;
@@ -76,6 +80,7 @@ export const projectsRelations = relations(projects, ({ one, many }) => ({
   owner: one(users, { fields: [projects.authorId], references: [users.id] }),
   members: many(projects_users),
   invites: many(projects_invites),
+  tasks: many(project_tasks),
 }));
 
 export type InsertProject = typeof projects.$inferInsert;
@@ -115,24 +120,19 @@ export const projectsUsersRelations = relations(projects_users, ({ one }) => ({
 export type InsertProjectUser = typeof projects_users.$inferInsert;
 export type SelectProjectUser = typeof projects_users.$inferSelect;
 
-export const projects_invites = createTable(
-  "projects_invites",
-  {
-    projectId: text("project_id").notNull(),
-    inviteeId: text("invitee_id").notNull(),
-    inviterId: text("inviter_id").notNull(),
-    role: text("role").notNull(),
-    allowedActions: text("allowed_actions").$type<Actions>().array().notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-  },
-  (table) => {
-    return {
-      pk: primaryKey({ columns: [table.projectId, table.inviteeId] }),
-    };
-  },
-);
+export const projects_invites = createTable("projects_invites", {
+  id: text("id")
+    .primaryKey()
+    .$default(() => sql`gen_random_uuid()`),
+  projectId: text("project_id").notNull(),
+  inviteeId: text("invitee_id").notNull(),
+  inviterId: text("inviter_id").notNull(),
+  role: text("role").$type<Roles>().notNull(),
+  allowedActions: text("allowed_actions").$type<Actions>().array().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+});
 
 export const projectsInvitesRelations = relations(
   projects_invites,
@@ -156,3 +156,29 @@ export const projectsInvitesRelations = relations(
 
 export type InsertProjectInvites = typeof projects_invites.$inferInsert;
 export type SelectProjectInvites = typeof projects_invites.$inferSelect;
+
+export const project_tasks = createTable("project_tasks", {
+  id: text("id")
+    .primaryKey()
+    .$default(() => sql`gen_random_uuid()`),
+  authorId: text("author_id").notNull(),
+  projectId: text("project_id").notNull(),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  badges: text("badges").array(),
+  column: text("column").notNull(),
+});
+
+export type InsertProjectTask = typeof project_tasks.$inferInsert;
+export type SelectProjectTask = typeof project_tasks.$inferSelect;
+
+export const projectTasksRelations = relations(project_tasks, ({ one }) => ({
+  author: one(users, {
+    fields: [project_tasks.authorId],
+    references: [users.id],
+  }),
+  project: one(projects, {
+    fields: [project_tasks.projectId],
+    references: [projects.id],
+  }),
+}));
