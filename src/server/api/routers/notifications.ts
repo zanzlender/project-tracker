@@ -14,12 +14,12 @@ export const notificationsRouter = createTRPCRouter({
   rejectInvite: protectedProcedure
     .input(
       z.object({
-        projectId: z.string(),
+        inviteId: z.string(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
       const response = await dto.RejectInvite({
-        projectId: input.projectId,
+        inviteId: input.inviteId,
         userId: ctx.currentUser.id,
       });
       return response;
@@ -28,12 +28,12 @@ export const notificationsRouter = createTRPCRouter({
   acceptInvite: protectedProcedure
     .input(
       z.object({
-        projectId: z.string(),
+        inviteId: z.string(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
       const response = await dto.AcceptInvite({
-        projectId: input.projectId,
+        inviteId: input.inviteId,
         userId: ctx.currentUser.id,
       });
       return response;

@@ -15,11 +15,9 @@ import {
 import { api } from "~/trpc/react";
 
 export default function InvitesActionDropdown({
-  username,
-  projectId,
+  inviteId,
 }: {
-  username: string;
-  projectId: string;
+  inviteId: string;
 }) {
   const router = useRouter();
   const handleDeleteInviteMutation = api.project.deleteInvite.useMutation({
@@ -34,8 +32,7 @@ export default function InvitesActionDropdown({
 
   const handleDeleteInvite = async () => {
     handleDeleteInviteMutation.mutate({
-      projectId: projectId,
-      username: username,
+      inviteId: inviteId,
     });
   };
 

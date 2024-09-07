@@ -57,6 +57,20 @@
       "when": 1725367046996,
       "tag": "0007_kind_deathbird",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1725713907759,
+      "tag": "0008_outgoing_bloodstorm",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1725714481815,
+      "tag": "0009_flowery_doomsday",
+      "breakpoints": true
     }
   ]
 }

@@ -1,3 +1,4 @@
+import { inferRouterOutputs } from "@trpc/server";
 import {
   LayoutDashboard,
   SquareChartGantt,
@@ -6,6 +7,8 @@ import {
   Users,
 } from "lucide-react";
 import { type ReactNode } from "react";
+import { AppRouter } from "~/server/api/root";
+import dto from "~/server/db/dto";
 
 export const DASHBOARD_SIDEBAR_LINKS = (
   projectId: string,
@@ -42,4 +45,17 @@ export const NAVIGATION_ITEMS = [
     displayName: "Dashboard",
     url: "/",
   },
+];
+
+export type KanbanColumn = {
+  id: string;
+  title: string;
+  tasks: NonNullable<Awaited<ReturnType<typeof dto.GetProjectTasks>>>["tasks"];
+};
+
+export const DEFAULT_KANBAN_COLUMNS: KanbanColumn[] = [
+  { id: "1", title: "Backlog 🚦", tasks: [] },
+  { id: "2", title: "In progress 🕴", tasks: [] },
+  { id: "3", title: "Needs review ⛑", tasks: [] },
+  { id: "4", title: "Completed ✅", tasks: [] },
 ];

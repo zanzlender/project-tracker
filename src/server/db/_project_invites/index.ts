@@ -36,37 +36,17 @@ export async function InviteUserToProject({
 }
 
 export async function DeleteInvite({
-  username,
-  projectId,
+  inviteId,
   kickerId,
 }: {
-  username: string;
-  projectId: string;
+  inviteId: string;
   kickerId: string;
 }) {
-  const project = await db.query.projects.findFirst({
-    where: eq(projectsTable.id, projectId),
-  });
-  if (!project || project.authorId !== kickerId) {
-    throw new Error("NOT_AUTHORIZED");
-  }
-
-  const user = await db.query.users.findFirst({
-    where: eq(usersTable.username, username),
-  });
-  if (!user) {
-    throw new Error("NOT_AUTHORIZED");
-  }
+  // TODO check if user can kick
 
   await db
     .delete(projectInvitesTable)
-    .where(
-      and(
-        eq(projectInvitesTable.projectId, projectId),
-        eq(projectInvitesTable.inviterId, kickerId),
-        eq(projectInvitesTable.inviteeId, user.id),
-      ),
-    )
+    .where(eq(projectInvitesTable.id, inviteId))
     .returning();
 
   return true;
@@ -76,6 +56,7 @@ export async function GetInvitesForUser({ userId }: { userId: string }) {
   const invites = await db.query.projects_invites.findMany({
     where: eq(projectInvitesTable.inviteeId, userId),
     columns: {
+      id: true,
       projectId: true,
       createdAt: true,
     },
@@ -97,18 +78,18 @@ export async function GetInvitesForUser({ userId }: { userId: string }) {
 }
 
 export async function RejectInvite({
+  inviteId,
   userId,
-  projectId,
 }: {
+  inviteId: string;
   userId: string;
-  projectId: string;
 }) {
   await db
     .delete(projectInvitesTable)
     .where(
       and(
         eq(projectInvitesTable.inviteeId, userId),
-        eq(projectInvitesTable.projectId, projectId),
+        eq(projectInvitesTable.id, inviteId),
       ),
     )
     .returning();
@@ -118,22 +99,22 @@ export async function RejectInvite({
 
 export async function AcceptInvite({
   userId,
-  projectId,
+  inviteId,
 }: {
   userId: string;
-  projectId: string;
+  inviteId: string;
 }) {
   const response = await db.transaction(async (tx) => {
     const invite = await db.query.projects_invites.findFirst({
       where: and(
-        eq(projectInvitesTable.projectId, projectId),
+        eq(projectInvitesTable.id, inviteId),
         eq(projectInvitesTable.inviteeId, userId),
       ),
     });
     if (!invite) return false;
 
     const addUser = await AddUserToProject({
-      projectId: projectId,
+      projectId: invite.projectId,
       userId: invite.inviteeId,
       allowedActions: invite.allowedActions,
       role: invite.role,
@@ -148,7 +129,7 @@ export async function AcceptInvite({
       .where(
         and(
           eq(projectInvitesTable.inviteeId, userId),
-          eq(projectInvitesTable.projectId, projectId),
+          eq(projectInvitesTable.id, inviteId),
         ),
       )
       .returning();

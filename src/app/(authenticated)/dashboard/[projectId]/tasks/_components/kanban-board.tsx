@@ -1,18 +1,18 @@
 "use client";
 
 import {
-  useDroppable,
+  type DragEndEvent,
+  type DragMoveEvent,
+  type DragOverEvent,
+  type UniqueIdentifier,
+  closestCorners,
   DndContext,
   DragOverlay,
-  useSensors,
-  useSensor,
-  PointerSensor,
   KeyboardSensor,
-  closestCorners,
-  DragOverEvent,
-  DragEndEvent,
+  PointerSensor,
+  useSensor,
+  useSensors,
 } from "@dnd-kit/core";
-import { ReactNode, useState } from "react";
 import {
   arrayMove,
   rectSortingStrategy,
@@ -21,38 +21,53 @@ import {
   useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { useEffect, useState } from "react";
+import clsx from "clsx";
+import { Badge } from "~/app/_components/ui/badge";
 
-type Column = {
-  id: string | number;
-  title: string;
-  tasks: typeof tasks;
-};
-const tasks = [
-  {
-    id: 1,
-    title: "1",
-    description: "213",
-  },
-  {
-    id: 2,
-    title: "2",
-    description: "223",
-  },
-  {
-    id: 3,
-    title: "3",
-    description: "233",
-  },
-  {
-    id: 4,
-    title: "4",
-    description: "243",
-  },
-];
+import { AddTaskSheet } from "./add-task";
+import { api } from "~/trpc/react";
+import { type KanbanColumn as Column } from "~/lib/constants";
+import { inferRouterOutputs } from "@trpc/server";
+import { AppRouter } from "~/server/api/root";
 
-export default function KanbanBoard({ columns }: { columns: Column[] }) {
+export default function KanbanBoard333({
+  columns,
+  projectId,
+}: {
+  columns: Column[];
+  projectId: string;
+}) {
+  const trpcUtils = api.useUtils();
   const [_columns, setColumns] = useState(() => columns);
-  const [activeId, setActiveId] = useState(false);
+  const [activeColumnId, setActiveColumndId] =
+    useState<UniqueIdentifier | null>(null);
+  const activeColumn =
+    activeColumnId && findValueOfItems(activeColumnId, "container");
+  const [activeTaskId, setActiveTaskId] = useState<UniqueIdentifier | null>(
+    null,
+  );
+  const activeTask = activeTaskId && findTaskObjectById(activeTaskId);
+
+  const updateTasksMutation = api.project.updateTask.useMutation();
+
+  const handleUpdateColumns = async (props: {
+    id: string;
+    description: string;
+    title: string;
+    badges: string[];
+    column: string;
+  }) => {
+    updateTasksMutation.mutate({
+      id: props.id,
+      badges: props.badges,
+      column: props.column,
+      description: props.description,
+      title: props.title,
+    });
+
+    await trpcUtils.project.getTasksForProject.invalidate();
+  };
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -61,148 +76,392 @@ export default function KanbanBoard({ columns }: { columns: Column[] }) {
     }),
   );
 
-  const findColumn = (unique: string | null) => {
-    if (!unique) {
-      return null;
-    }
-    if (columns.some((c) => c.id === unique)) {
-      return columns.find((c) => c.id === unique) ?? null;
-    }
-    const id = String(unique);
-    const itemWithColumnId = columns.flatMap((c) => {
-      const columnId = c.id;
-      return c.tasks.map((i) => ({ itemId: i.id, columnId: columnId }));
-    });
-    const columnId = itemWithColumnId.find(
-      (i) => i.itemId.toString() === id,
-    )?.columnId;
+  const handleDragStart = (event: DragOverEvent) => {
+    const { active } = event;
+    const { id } = active;
 
-    return columns.find((c) => c.id === columnId) ?? null;
+    if (active.data.current?.type === "item") {
+      setActiveTaskId(id);
+    } else if (active.data.current?.type === "container") {
+      setActiveColumndId(id);
+    }
   };
 
-  const handleDragOver = (event: DragOverEvent) => {
-    console.log("START");
-    setActiveId(true);
-    const { active, over, delta } = event;
-    const activeId = String(active.id);
-    const overId = over ? String(over.id) : null;
-    const activeColumn = findColumn(activeId);
-    const overColumn = findColumn(overId);
-    console.log("Active column", activeColumn);
-    console.log("over column", overColumn);
-
-    if (!activeColumn || !overColumn || activeColumn === overColumn) {
-      return null;
-    }
-    setColumns((prevState) => {
-      const activeItems = activeColumn.tasks;
-      const overItems = overColumn.tasks;
-      const activeIndex = activeItems.findIndex(
-        (i) => i.id.toString() === activeId,
-      );
-      const overIndex = overItems.findIndex((i) => i.id.toString() === overId);
-      const newIndex = () => {
-        const putOnBelowLastItem =
-          overIndex === overItems.length - 1 && delta.y > 0;
-        const modifier = putOnBelowLastItem ? 1 : 0;
-        return overIndex >= 0 ? overIndex + modifier : overItems.length + 1;
-      };
-      return prevState.map((c) => {
-        if (c.id === activeColumn.id) {
-          console.log("task", c.id);
-
-          c.tasks = activeItems.filter((i) => i.id.toString() !== activeId);
-          return c;
-        } else if (c.id === overColumn.id) {
-          const tasksBefore = overItems.slice(0, newIndex());
-          const tasksAfter = overItems.slice(newIndex(), overItems.length);
-          const task = activeItems[activeIndex];
-
-          if (!task) return c;
-
-          c.tasks = [...tasksBefore, task, ...tasksAfter];
-          return c;
-        } else {
-          return c;
-        }
-      });
-    });
-  };
-
-  const handleDragEnd = (event: DragEndEvent) => {
-    console.log("END");
-    setActiveId(false);
+  const handleDragMove = (event: DragMoveEvent) => {
     const { active, over } = event;
-    const activeId = String(active.id);
-    const overId = over ? String(over.id) : null;
-    const activeColumn = findColumn(activeId);
-    const overColumn = findColumn(overId);
-    if (!activeColumn || !overColumn || activeColumn !== overColumn) {
-      return null;
+
+    // Handle Items Sorting
+    if (
+      active.data.current?.type === "item" &&
+      over?.data.current?.type === "item" &&
+      active &&
+      over &&
+      active.id !== over.id
+    ) {
+      // Find the active container and over container
+      const activeContainer = findValueOfItems(active.id, "item");
+      const overContainer = findValueOfItems(over.id, "item");
+
+      // If the active or over container is not found, return
+      if (!activeContainer || !overContainer) return;
+
+      // Find the index of the active and over container
+      const activeContainerIndex = _columns.findIndex(
+        (container) => container.id === activeContainer.id,
+      );
+      const overContainerIndex = _columns.findIndex(
+        (container) => container.id === overContainer.id,
+      );
+
+      // Find the index of the active and over item
+      const activeitemIndex = activeContainer.tasks.findIndex(
+        (item) => item.id === active.id,
+      );
+      const overitemIndex = overContainer.tasks.findIndex(
+        (item) => item.id === over.id,
+      );
+      // In the same container
+      if (activeContainerIndex === overContainerIndex) {
+        const newItems = [..._columns];
+        if (newItems[activeContainerIndex]) {
+          newItems[activeContainerIndex].tasks = arrayMove(
+            newItems[activeContainerIndex].tasks,
+            activeitemIndex,
+            overitemIndex,
+          );
+        }
+
+        setColumns(newItems);
+      } else {
+        // In different containers
+        const newItems = [..._columns];
+        const removeditem = newItems[activeContainerIndex]?.tasks.splice(
+          activeitemIndex,
+          1,
+        );
+        if (removeditem?.[0]) {
+          newItems[overContainerIndex]?.tasks.splice(
+            overitemIndex,
+            0,
+            removeditem[0],
+          );
+        }
+
+        setColumns(newItems);
+      }
     }
-    const activeIndex = activeColumn.tasks.findIndex(
-      (i) => i.id.toString() === activeId,
-    );
-    const overIndex = overColumn.tasks.findIndex(
-      (i) => i.id.toString() === overId,
-    );
-    if (activeIndex !== overIndex) {
-      setColumns((prevState) => {
-        const x = prevState.map((column) => {
-          if (column.id === activeColumn.id) {
-            column.tasks = arrayMove(overColumn.tasks, activeIndex, overIndex);
-            return column;
-          } else {
-            return column;
-          }
-        });
-        console.log("X", x);
-        return x;
-      });
+
+    // Handling Item Drop Into a Container
+    if (
+      active.data.current?.type === "item" &&
+      over?.data.current?.type === "container" &&
+      active &&
+      over &&
+      active.id !== over.id
+    ) {
+      // Find the active and over container
+      const activeContainer = findValueOfItems(active.id, "item");
+      const overContainer = findValueOfItems(over.id, "container");
+
+      // If the active or over container is not found, return
+      if (!activeContainer || !overContainer) return;
+
+      // Find the index of the active and over container
+      const activeContainerIndex = _columns.findIndex(
+        (container) => container.id === activeContainer.id,
+      );
+      const overContainerIndex = _columns.findIndex(
+        (container) => container.id === overContainer.id,
+      );
+
+      // Find the index of the active and over item
+      const activeitemIndex = activeContainer.tasks.findIndex(
+        (item) => item.id === active.id,
+      );
+
+      // Remove the active item from the active container and add it to the over container
+      const newItems = [..._columns];
+      const removeditem = newItems[activeContainerIndex]?.tasks.splice(
+        activeitemIndex,
+        1,
+      );
+      if (removeditem?.[0]) {
+        newItems[overContainerIndex]?.tasks.push(removeditem[0]);
+      }
+      setColumns(newItems);
     }
+  };
+
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+
+    // Handling Container Sorting
+    if (
+      active.data.current?.type === "container" &&
+      over?.data.current?.type === "container" &&
+      active &&
+      over &&
+      active.id !== over.id
+    ) {
+      // Find the index of the active and over container
+      const activeContainerIndex = _columns.findIndex(
+        (container) => container.id === active.id,
+      );
+      const overContainerIndex = _columns.findIndex(
+        (container) => container.id === over.id,
+      );
+      // Swap the active and over container
+      let newItems = [..._columns];
+      newItems = arrayMove(newItems, activeContainerIndex, overContainerIndex);
+      setColumns(newItems);
+    }
+
+    // Handling item Sorting
+    if (
+      active.data.current?.type === "item" &&
+      over?.data.current?.type === "item" &&
+      active &&
+      over &&
+      active.id !== over.id
+    ) {
+      // Find the active and over container
+      const activeContainer = findValueOfItems(active.id, "item");
+      const overContainer = findValueOfItems(over.id, "item");
+
+      // If the active or over container is not found, return
+      if (!activeContainer || !overContainer) return;
+      // Find the index of the active and over container
+      const activeContainerIndex = _columns.findIndex(
+        (container) => container.id === activeContainer.id,
+      );
+      const overContainerIndex = _columns.findIndex(
+        (container) => container.id === overContainer.id,
+      );
+      // Find the index of the active and over item
+      const activeitemIndex = activeContainer.tasks.findIndex(
+        (item) => item.id === active.id,
+      );
+      const overitemIndex = overContainer.tasks.findIndex(
+        (item) => item.id === over.id,
+      );
+
+      // In the same container
+      if (activeContainerIndex === overContainerIndex) {
+        const newItems = [..._columns];
+        if (newItems[activeContainerIndex]) {
+          newItems[activeContainerIndex].tasks = arrayMove(
+            newItems[activeContainerIndex].tasks,
+            activeitemIndex,
+            overitemIndex,
+          );
+        }
+        setColumns(newItems);
+      } else {
+        // In different containers
+        const newItems = [..._columns];
+        const removeditem = newItems[activeContainerIndex]?.tasks.splice(
+          activeitemIndex,
+          1,
+        );
+        if (removeditem?.[0]) {
+          newItems[overContainerIndex]?.tasks.splice(
+            overitemIndex,
+            0,
+            removeditem[0],
+          );
+        }
+        setColumns(newItems);
+      }
+    }
+
+    // Handling item dropping into Container
+    if (
+      active.data.current?.type === "item" &&
+      over?.data.current?.type === "container" &&
+      active &&
+      over &&
+      active.id !== over.id
+    ) {
+      // Find the active and over container
+      const activeContainer = findValueOfItems(active.id, "item");
+      const overContainer = findValueOfItems(over.id, "container");
+
+      // If the active or over container is not found, return
+      if (!activeContainer || !overContainer) return;
+      // Find the index of the active and over container
+      const activeContainerIndex = _columns.findIndex(
+        (container) => container.id === activeContainer.id,
+      );
+      const overContainerIndex = _columns.findIndex(
+        (container) => container.id === overContainer.id,
+      );
+      // Find the index of the active and over item
+      const activeitemIndex = activeContainer.tasks.findIndex(
+        (item) => item.id === active.id,
+      );
+
+      const newItems = [..._columns];
+      const removeditem = newItems[activeContainerIndex]?.tasks.splice(
+        activeitemIndex,
+        1,
+      );
+      console.log("HERE2131232");
+      if (removeditem?.[0]) {
+        newItems[overContainerIndex]?.tasks.push(removeditem[0]);
+        setColumns(newItems);
+        console.log("HERE2131232");
+        handleUpdateColumns({
+          badges: removeditem[0]?.badges ?? [],
+          column: overContainer.id,
+          description: removeditem[0].description,
+          id: removeditem[0].id,
+          title: removeditem[0].title,
+        }).catch((err) => console.log(err));
+      }
+    }
+    setActiveTaskId(null);
+    setActiveColumndId(null);
+  }
+
+  function findValueOfItems(id: UniqueIdentifier | undefined, type: string) {
+    if (type === "container") {
+      return _columns.find((col) => col.id === id);
+    }
+    if (type === "item") {
+      return _columns.find((col) => col.tasks.find((task) => task.id === id));
+    }
+  }
+
+  function findTaskObjectById(id: UniqueIdentifier) {
+    let foundTask = null;
+
+    for (const col of _columns) {
+      for (const task of col.tasks) {
+        if (task.id === id) {
+          foundTask = task;
+          break;
+        }
+      }
+    }
+    return foundTask;
+  }
+
+  const onAddItem = (
+    props: inferRouterOutputs<AppRouter>["project"]["createTask"],
+  ) => {
+    const newData = [..._columns];
+    const containerIdx = _columns.findIndex((col) => col.id === activeColumnId);
+
+    if (!containerIdx) return;
+
+    newData[containerIdx]?.tasks.push({
+      id: props.id,
+      title: props.title,
+      description: props.description,
+      badges: props.badges ?? [],
+      authorId: props.authorId,
+      column: props.column,
+      author: props.author,
+      projectId: props.projectId,
+    });
+
+    setColumns(newData);
   };
 
   return (
-    <DndContext
-      sensors={sensors}
-      collisionDetection={closestCorners}
-      onDragEnd={handleDragEnd}
-      onDragOver={handleDragOver}
-    >
-      <div className="relative flex h-full max-h-full min-h-0 min-w-[100px] overflow-x-auto">
-        <div className="flex h-full max-h-full min-h-0 flex-row gap-5">
-          {_columns.map((column) => {
-            return (
-              <KanbanColumn
-                key={`column-${column.id}`}
-                id={column.id}
-                title={column.title}
-                tasks={column.tasks}
-              />
-            );
-          })}
-        </div>
+    <>
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCorners}
+        onDragStart={handleDragStart}
+        onDragMove={handleDragMove}
+        onDragEnd={handleDragEnd}
+      >
+        <div className="relative flex h-full max-h-full min-h-0 min-w-[100px] overflow-x-auto">
+          <div className="flex h-full max-h-full min-h-0 flex-row gap-5">
+            {/*   <SortableContext
+              items={_columns.map((x) => x.id)}
+              strategy={rectSortingStrategy}
+            > */}
+            {_columns.map((column) => {
+              return (
+                <KanbanColumn
+                  onAfterCreateTask={onAddItem}
+                  key={String(column.id)}
+                  id={column.id}
+                  tasks={column.tasks}
+                  title={column.title}
+                  projectId={projectId}
+                />
+              );
+            })}
+            {/* </SortableContext> */}
+          </div>
 
-        {/*  <DragOverlay>
-          {activeId ? (
-            <DraggableTask
-              value={111}
-              id={111}
-              description={"idc"}
-              title="213"
-            />
-          ) : null}
-        </DragOverlay> */}
-      </div>
-    </DndContext>
+          <DragOverlay adjustScale={false}>
+            {/* Drag Overlay For item Item */}
+            {activeTask && (
+              <DraggableTask
+                id={activeTask.id.toString()}
+                title={activeTask.title}
+                description={activeTask.description}
+                badges={activeTask.badges ?? []}
+              />
+            )}
+
+            {/* Drag Overlay For Container */}
+            {/*  {activeColumn && (
+              <KanbanColumn
+                id={activeColumn.id}
+                title={activeColumn.title}
+                tasks={activeColumn.tasks}
+              />
+            )} */}
+          </DragOverlay>
+        </div>
+      </DndContext>
+    </>
   );
 }
 
-function KanbanColumn(props: Column) {
-  const { setNodeRef } = useDroppable({ id: props.id });
+function KanbanColumn(
+  props: Column & {
+    projectId: string;
+    onAfterCreateTask: (
+      props: inferRouterOutputs<AppRouter>["project"]["createTask"],
+    ) => void;
+  },
+) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({
+    id: props.id,
+    data: {
+      type: "container",
+    },
+  });
+
+  const style = {
+    transform: CSS.Translate.toString(transform),
+    transition: transition,
+  };
 
   return (
-    <div className="h-full w-[400px] overflow-hidden rounded-md bg-gray-200">
+    <div
+      /*   ref={setNodeRef}
+      style={style}
+      {...listeners}
+      {...attributes} */
+      className={clsx(
+        "h-full w-[400px] overflow-hidden rounded-md bg-gray-200 transition-opacity duration-200",
+        isDragging && "opacity-70",
+      )}
+    >
       <div className="grid h-full w-full auto-cols-min grid-flow-row grid-cols-1 grid-rows-[auto_1fr_auto] overflow-x-hidden">
         <div className="w-full flex-grow-0 bg-gray-400 p-3">
           <span className="font-semibold">{props.title}</span>
@@ -214,7 +473,7 @@ function KanbanColumn(props: Column) {
         >
           <div
             ref={setNodeRef}
-            className="relative flex w-full flex-col gap-2 overflow-x-hidden bg-red-500 p-2"
+            className="relative flex min-h-[300px] w-full flex-col gap-2 overflow-x-hidden bg-red-500 p-2"
           >
             {props.tasks.map((task) => {
               return (
@@ -223,6 +482,7 @@ function KanbanColumn(props: Column) {
                   id={task.id}
                   title={task.title}
                   description={task.description}
+                  badges={task.badges ?? []}
                 />
               );
             })}
@@ -230,28 +490,45 @@ function KanbanColumn(props: Column) {
         </SortableContext>
 
         <div className="w-full bg-gray-400 p-3">
-          <AddTaskSheet />
+          <AddTaskSheet
+            onAfterCreateTask={props.onAfterCreateTask}
+            column={props.id.toString()}
+            projectId={props.projectId}
+          />
         </div>
       </div>
     </div>
   );
 }
 
-import { Badge } from "~/app/_components/ui/badge";
-import { AddTaskSheet } from "./add-task";
-
 export function DraggableTask({
   id,
   title,
   description,
-}: (typeof tasks)[number]) {
-  const { attributes, listeners, setNodeRef, transform } = useSortable({
+  badges,
+}: {
+  id: string;
+  title: string;
+  description: string;
+  badges: string[];
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({
     id: id,
+    data: {
+      type: "item",
+    },
   });
 
   const style = {
-    border: "2px solid green",
     transform: CSS.Translate.toString(transform),
+    transition: transition,
   };
 
   return (
@@ -260,14 +537,17 @@ export function DraggableTask({
       style={style}
       {...listeners}
       {...attributes}
-      className="w-full rounded-md border bg-gray-400 p-3"
+      className={clsx(
+        "z-50 w-full rounded-md border bg-gray-400 p-3 transition-opacity duration-200",
+        isDragging && "scale-[101%] opacity-50",
+      )}
     >
       <p className="font-bold">{title}</p>
       <p className="mb-2">{description}</p>
       <div className="flex flex-row gap-1">
-        <Badge>Badge 1</Badge>
-        <Badge>Badge 2</Badge>
-        <Badge>Badge 3</Badge>
+        {badges?.map((badge, idx) => {
+          return <Badge key={`badge-${idx}-${badge}`}>{badge}</Badge>;
+        })}
       </div>
     </div>
   );

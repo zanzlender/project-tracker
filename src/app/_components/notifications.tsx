@@ -21,34 +21,34 @@ export default function Notifications() {
   const trpcUtils = api.useUtils();
 
   const notificationsQuery = api.notifications.getNotifications.useQuery();
-  const acceptInviteQuery = api.notifications.acceptInvite.useMutation({
+  const acceptInviteMutation = api.notifications.acceptInvite.useMutation({
     onError: () => {
       toast("❌ Failed to execute");
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       toast("🎉 Invite accepted! Check your dashboard to see the project!");
       if (pathname === "/dashboard") router.refresh();
-      trpcUtils.notifications.getNotifications.invalidate();
+      await trpcUtils.notifications.getNotifications.invalidate();
     },
   });
   const rejectInviteQuery = api.notifications.rejectInvite.useMutation({
     onError: () => {
       toast("❌ Failed to execute");
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       toast("🎉 Invite rejected!");
-      trpcUtils.notifications.getNotifications.invalidate();
+      await trpcUtils.notifications.getNotifications.invalidate();
     },
   });
 
-  const handleAcceptInvite = (projectId: string) => async () => {
-    acceptInviteQuery.mutate({
-      projectId: projectId,
+  const handleAcceptInvite = (inviteId: string) => async () => {
+    acceptInviteMutation.mutate({
+      inviteId: inviteId,
     });
   };
-  const handleRejectInvite = (projectId: string) => async () => {
+  const handleRejectInvite = (inviteId: string) => async () => {
     rejectInviteQuery.mutate({
-      projectId: projectId,
+      inviteId: inviteId,
     });
   };
 
@@ -95,14 +95,14 @@ export default function Notifications() {
                     <div className="flex w-fit flex-row items-center gap-2">
                       <Button
                         size={"sm"}
-                        onClick={handleAcceptInvite(notification.projectId)}
+                        onClick={handleAcceptInvite(notification.id)}
                       >
                         Accept
                       </Button>
                       <Button
                         size="sm"
                         variant={"destructive"}
-                        onClick={handleRejectInvite(notification.projectId)}
+                        onClick={handleRejectInvite(notification.id)}
                       >
                         Reject
                       </Button>
