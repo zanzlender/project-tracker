@@ -10,6 +10,8 @@ import { Toaster } from "~/app/_components/ui/sonner";
 import PlausibleProvider from "next-plausible";
 import Script from "next/script";
 import { CSPostHogProvider } from "./_components/posthog-provider";
+import posthog from "posthog-js";
+import { Button } from "./_components/ui/button";
 
 const fontSans = FontSans({
   subsets: ["latin"],
