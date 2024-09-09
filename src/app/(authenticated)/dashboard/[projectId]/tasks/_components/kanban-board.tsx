@@ -32,6 +32,7 @@ import { type KanbanColumn as Column } from "~/lib/constants";
 import { type inferRouterOutputs } from "@trpc/server";
 import { type AppRouter } from "~/server/api/root";
 import { toast } from "sonner";
+import _debounce from "lodash.debounce";
 
 export default function KanbanBoard({
   columns,
@@ -100,6 +101,7 @@ export default function KanbanBoard({
   };
 
   const handleDragMove = (event: DragMoveEvent) => {
+    console.log("MOVE");
     const { active, over } = event;
 
     // Handle Items Sorting
@@ -202,10 +204,6 @@ export default function KanbanBoard({
       }
       setColumns(newItems);
     }
-  };
-
-  function handleDragEnd(event: DragEndEvent) {
-    const { active, over } = event;
 
     // Handling Container Sorting
     if (
@@ -227,101 +225,9 @@ export default function KanbanBoard({
       newItems = arrayMove(newItems, activeContainerIndex, overContainerIndex);
       setColumns(newItems);
     }
+  };
 
-    // Handling item Sorting
-    if (
-      active.data.current?.type === "item" &&
-      over?.data.current?.type === "item" &&
-      active &&
-      over &&
-      active.id !== over.id
-    ) {
-      // Find the active and over container
-      const activeContainer = findValueOfItems(active.id, "item");
-      const overContainer = findValueOfItems(over.id, "item");
-
-      // If the active or over container is not found, return
-      if (!activeContainer || !overContainer) return;
-      // Find the index of the active and over container
-      const activeContainerIndex = _columns.findIndex(
-        (container) => container.id === activeContainer.id,
-      );
-      const overContainerIndex = _columns.findIndex(
-        (container) => container.id === overContainer.id,
-      );
-      // Find the index of the active and over item
-      const activeitemIndex = activeContainer.tasks.findIndex(
-        (item) => item.id === active.id,
-      );
-      const overitemIndex = overContainer.tasks.findIndex(
-        (item) => item.id === over.id,
-      );
-
-      // In the same container
-      if (activeContainerIndex === overContainerIndex) {
-        const newItems = [..._columns];
-        if (newItems[activeContainerIndex]) {
-          newItems[activeContainerIndex].tasks = arrayMove(
-            newItems[activeContainerIndex].tasks,
-            activeitemIndex,
-            overitemIndex,
-          );
-        }
-        setColumns(newItems);
-      } else {
-        // In different containers
-        const newItems = [..._columns];
-        const removeditem = newItems[activeContainerIndex]?.tasks.splice(
-          activeitemIndex,
-          1,
-        );
-        if (removeditem?.[0]) {
-          newItems[overContainerIndex]?.tasks.splice(
-            overitemIndex,
-            0,
-            removeditem[0],
-          );
-        }
-        setColumns(newItems);
-      }
-    }
-
-    // Handling item dropping into Container
-    if (
-      active.data.current?.type === "item" &&
-      over?.data.current?.type === "container" &&
-      active &&
-      over &&
-      active.id !== over.id
-    ) {
-      // Find the active and over container
-      const activeContainer = findValueOfItems(active.id, "item");
-      const overContainer = findValueOfItems(over.id, "container");
-
-      // If the active or over container is not found, return
-      if (!activeContainer || !overContainer) return;
-      // Find the index of the active and over container
-      const activeContainerIndex = _columns.findIndex(
-        (container) => container.id === activeContainer.id,
-      );
-      const overContainerIndex = _columns.findIndex(
-        (container) => container.id === overContainer.id,
-      );
-      // Find the index of the active and over item
-      const activeitemIndex = activeContainer.tasks.findIndex(
-        (item) => item.id === active.id,
-      );
-
-      const newItems = [..._columns];
-      const removeditem = newItems[activeContainerIndex]?.tasks.splice(
-        activeitemIndex,
-        1,
-      );
-      if (removeditem?.[0]) {
-        newItems[overContainerIndex]?.tasks.push(removeditem[0]);
-        setColumns(newItems);
-      }
-    }
+  function handleDragEnd(event: DragEndEvent) {
     setActiveTaskId(null);
     setActiveColumndId(null);
   }
@@ -379,7 +285,7 @@ export default function KanbanBoard({
         sensors={sensors}
         collisionDetection={closestCorners}
         onDragStart={handleDragStart}
-        onDragMove={handleDragMove}
+        onDragMove={_debounce(handleDragMove, 100)}
         onDragEnd={handleDragEnd}
       >
         <div className="relative flex h-full max-h-full min-h-0 min-w-[100px] overflow-x-auto">
