@@ -18,7 +18,7 @@ export default async function LoggedInLayout({
           <div className="flex items-center gap-x-4">
             <Link href="/dashboard">
               <h1 className="relative flex select-none flex-row items-baseline text-3xl font-bold">
-                ProjectPlanner
+                PPlanner
               </h1>
             </Link>
           </div>
@@ -46,7 +46,7 @@ export default async function LoggedInLayout({
           <div>
             <Link href="/dashboard">
               <h1 className="relative flex select-none flex-row items-baseline text-3xl font-bold">
-                ProjectPlanner
+                PPlanner
               </h1>
             </Link>
           </div>

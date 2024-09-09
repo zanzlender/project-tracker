@@ -14,8 +14,8 @@ export default async function Home() {
         <div className="mx-auto flex h-24 w-full max-w-7xl items-center justify-between gap-x-6 px-4 py-6">
           <div className="flex items-center gap-x-4">
             <Link href="/dashboard">
-              <h1 className="relative flex select-none flex-row items-baseline text-2xl font-bold text-white md:text-3xl">
-                ProjectPlanner
+              <h1 className="relative flex select-none flex-row items-baseline bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-2xl font-bold text-transparent md:text-3xl">
+                PPlanner
               </h1>
             </Link>
           </div>
@@ -139,16 +139,14 @@ export default async function Home() {
       </div>
 
       <footer className="flex min-h-[300px] w-full flex-col items-center justify-center bg-black">
-        <div className="mx-auto flex w-full max-w-7xl flex-row items-center justify-between gap-12 px-4 py-20">
-          <div className="flex items-center gap-x-4">
-            <Link href="/dashboard">
-              <h1 className="relative flex select-none flex-row items-baseline text-2xl font-bold text-white md:text-3xl">
-                ProjectPlanner
-              </h1>
-            </Link>
+        <div className="mx-auto flex w-full max-w-7xl flex-col items-center justify-between gap-12 px-4 py-20 md:flex-row">
+          <div className="flex items-center gap-4">
+            <span className="relative flex select-none flex-row items-baseline bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-xl font-bold text-transparent text-white md:text-3xl">
+              ProjectPlanner
+            </span>
           </div>
 
-          <span className="text-slate-400">
+          <span className="text-sm text-slate-400">
             Copyright @ 2022. All rights reserved.
           </span>
         </div>

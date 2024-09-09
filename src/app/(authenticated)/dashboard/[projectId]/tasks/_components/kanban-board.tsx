@@ -317,7 +317,6 @@ export default function KanbanBoard({
         activeitemIndex,
         1,
       );
-      console.log("HERE2131232");
       if (removeditem?.[0]) {
         newItems[overContainerIndex]?.tasks.push(removeditem[0]);
         setColumns(newItems);
@@ -544,7 +543,7 @@ export function DraggableTask({
       {...listeners}
       {...attributes}
       className={clsx(
-        "z-50 w-full rounded-md border bg-gray-50 p-3 shadow-md transition-opacity duration-200",
+        "w-full rounded-md border bg-gray-50 p-3 shadow-md transition-opacity duration-200",
         isDragging && "scale-[101%] opacity-50",
       )}
     >
@@ -553,7 +552,7 @@ export function DraggableTask({
           <p className="font-bold">{title}</p>
           <p className="mb-2">{description}</p>
         </div>
-        <div className="h-4 w-4 bg-blue-500"></div>
+        <div className="h-4 w-4 rounded-full bg-blue-500"></div>
       </div>
       <div className="flex flex-row gap-1">
         {badges?.map((badge, idx) => {

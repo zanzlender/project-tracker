@@ -40,7 +40,7 @@ export default function MobileNavigation({
                     className="w-full"
                     key={`nav-item-id-${item.url}`}
                   >
-                    <SheetClose className="w-full">
+                    <SheetClose className="w-full" asChild>
                       <Button variant={"outline"} className="w-full">
                         {item.displayName}
                       </Button>
@@ -60,9 +60,11 @@ export default function MobileNavigation({
                   }))}
                 />
 
-                <Button className="w-full" variant={"destructive"}>
-                  <SignOutButton>Sign out</SignOutButton>
-                </Button>
+                <SheetClose asChild>
+                  <Button className="w-full" variant={"destructive"}>
+                    <SignOutButton>Sign out</SignOutButton>
+                  </Button>
+                </SheetClose>
               </div>
             </div>
           </SheetHeader>

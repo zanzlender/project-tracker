@@ -37,7 +37,7 @@ export default async function ProjectPage({
 
   return (
     <>
-      <div className="flex w-full flex-col gap-8">
+      <div className="flex w-full flex-col gap-8 p-6 lg:px-8">
         <div className="flex w-full max-w-4xl flex-col gap-6">
           {/** MEMBERS TABLE */}
           <div className="flex w-full flex-row items-center justify-between">

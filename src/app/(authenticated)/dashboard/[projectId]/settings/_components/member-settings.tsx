@@ -49,7 +49,7 @@ export default function MemberSettings({
 
   return (
     <Dialog>
-      <DialogTrigger>
+      <DialogTrigger asChild>
         <Button variant={"destructive"}>Leave project</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">

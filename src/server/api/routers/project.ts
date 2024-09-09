@@ -266,7 +266,6 @@ export const projectsRouter = createTRPCRouter({
 
       for (const column of input) {
         for (const task of column.tasks) {
-          console.log("T", task);
           allTasks.push({
             ...task,
           });

@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import DeleteProjectDialog from "./_components/delete-project-dialog";
-import { api, HydrateClient } from "~/trpc/server";
+import { api } from "~/trpc/server";
 import { auth } from "@clerk/nextjs/server";
 import MemberSettings from "./_components/member-settings";
 
@@ -16,8 +16,8 @@ export default async function SettingsPage({
   const isCurrentUserOwner = project.authorId === userId;
 
   return (
-    <HydrateClient>
-      <div className="flex w-full flex-col gap-4">
+    <>
+      <div className="flex w-full flex-col gap-4 p-6 lg:px-8">
         <div className="flex w-full max-w-3xl flex-col">
           <span className="mb-10 text-2xl font-semibold">Project settings</span>
 
@@ -62,6 +62,6 @@ export default async function SettingsPage({
           </div>
         </div>
       </div>
-    </HydrateClient>
+    </>
   );
 }

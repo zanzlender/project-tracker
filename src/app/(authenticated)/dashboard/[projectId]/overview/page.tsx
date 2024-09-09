@@ -18,7 +18,7 @@ export default async function ProjectPage({
 
   return (
     <>
-      <div className="flex w-full flex-col gap-4">
+      <div className="flex w-full flex-col gap-4 p-6 lg:px-8">
         <div className="w-full max-w-2xl">
           <Suspense>
             <UpdateProjectForm project={project} />

@@ -49,7 +49,7 @@ export default function DeleteProjectDialog({
 
   return (
     <Dialog>
-      <DialogTrigger>
+      <DialogTrigger asChild>
         <Button variant={"destructive"}>Delete projtect</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
