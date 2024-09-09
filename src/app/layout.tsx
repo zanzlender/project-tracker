@@ -10,8 +10,7 @@ import { Toaster } from "~/app/_components/ui/sonner";
 import PlausibleProvider from "next-plausible";
 import Script from "next/script";
 import { CSPostHogProvider } from "./_components/posthog-provider";
-import posthog from "posthog-js";
-import { Button } from "./_components/ui/button";
+import NextTopLoader from "nextjs-toploader";
 
 const fontSans = FontSans({
   subsets: ["latin"],
@@ -53,6 +52,7 @@ export default function RootLayout({
               "flex min-h-screen w-screen flex-col overflow-x-hidden bg-background font-sans antialiased",
             )}
           >
+            <NextTopLoader color="rgb(147 51 234)" />
             <TRPCReactProvider>{children}</TRPCReactProvider>
             <Toaster
               toastOptions={{
