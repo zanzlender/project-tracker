@@ -25,23 +25,24 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <PlausibleProvider domain="projectplanner.online">
-      <ClerkProvider>
-        <html lang="en" className={`${fontSans.variable}`}>
-          <body
-            className={cn(
-              "flex min-h-screen w-screen flex-col overflow-x-hidden bg-background font-sans antialiased",
-            )}
-          >
-            <TRPCReactProvider>{children}</TRPCReactProvider>
-            <Toaster
-              toastOptions={{
-                closeButton: true,
-              }}
-            />
-          </body>
-        </html>
-      </ClerkProvider>
-    </PlausibleProvider>
+    <ClerkProvider>
+      <html lang="en" className={`${fontSans.variable}`}>
+        <head>
+          <PlausibleProvider domain="projectplanner.online" />
+        </head>
+        <body
+          className={cn(
+            "flex min-h-screen w-screen flex-col overflow-x-hidden bg-background font-sans antialiased",
+          )}
+        >
+          <TRPCReactProvider>{children}</TRPCReactProvider>
+          <Toaster
+            toastOptions={{
+              closeButton: true,
+            }}
+          />
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }
