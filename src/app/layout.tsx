@@ -24,11 +24,19 @@ export const metadata: Metadata = {
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  const domain =
+    process.env.NODE_ENV === "production"
+      ? "projectplanner.online"
+      : "localhost:3000";
+
   return (
     <ClerkProvider>
       <html lang="en" className={`${fontSans.variable}`}>
         <head>
-          <PlausibleProvider domain="projectplanner.online" />
+          <PlausibleProvider
+            domain={domain}
+            enabled={!domain.includes("localhost")}
+          />
         </head>
         <body
           className={cn(
