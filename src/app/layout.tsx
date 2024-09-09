@@ -9,6 +9,7 @@ import { cn } from "~/lib/utils";
 import { Toaster } from "~/app/_components/ui/sonner";
 import PlausibleProvider from "next-plausible";
 import Script from "next/script";
+import { CSPostHogProvider } from "./_components/posthog-provider";
 
 const fontSans = FontSans({
   subsets: ["latin"],
@@ -44,18 +45,20 @@ export default function RootLayout({
             src="https://plausible.io/js/script.js"
           />
         </head>
-        <body
-          className={cn(
-            "flex min-h-screen w-screen flex-col overflow-x-hidden bg-background font-sans antialiased",
-          )}
-        >
-          <TRPCReactProvider>{children}</TRPCReactProvider>
-          <Toaster
-            toastOptions={{
-              closeButton: true,
-            }}
-          />
-        </body>
+        <CSPostHogProvider>
+          <body
+            className={cn(
+              "flex min-h-screen w-screen flex-col overflow-x-hidden bg-background font-sans antialiased",
+            )}
+          >
+            <TRPCReactProvider>{children}</TRPCReactProvider>
+            <Toaster
+              toastOptions={{
+                closeButton: true,
+              }}
+            />
+          </body>
+        </CSPostHogProvider>
       </html>
     </ClerkProvider>
   );
