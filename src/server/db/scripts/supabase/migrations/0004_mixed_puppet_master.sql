@@ -1,1 +1,0 @@
-ALTER TABLE "project-tracker_projects" ADD COLUMN "username" varchar(256);

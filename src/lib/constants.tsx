@@ -47,10 +47,14 @@ export const NAVIGATION_ITEMS = [
   },
 ];
 
+export type ReturnedTask = NonNullable<
+  Awaited<ReturnType<typeof dto.GetProjectTasks>>
+>["tasks"][number];
+
 export type KanbanColumn = {
   id: string;
   title: string;
-  tasks: NonNullable<Awaited<ReturnType<typeof dto.GetProjectTasks>>>["tasks"];
+  tasks: ReturnedTask[];
 };
 
 export const DEFAULT_KANBAN_COLUMNS: KanbanColumn[] = [
