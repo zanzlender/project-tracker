@@ -8,6 +8,7 @@ import { TRPCReactProvider } from "~/trpc/react";
 import { cn } from "~/lib/utils";
 import { Toaster } from "~/app/_components/ui/sonner";
 import PlausibleProvider from "next-plausible";
+import Script from "next/script";
 
 const fontSans = FontSans({
   subsets: ["latin"],
@@ -33,9 +34,14 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en" className={`${fontSans.variable}`}>
         <head>
-          <PlausibleProvider
+          {/*   <PlausibleProvider
             domain={domain}
             enabled={!domain.includes("localhost")}
+          /> */}
+          <Script
+            id="plauible-basic-script"
+            data-domain={domain}
+            src="https://plausible.io/js/script.js"
           />
         </head>
         <body
