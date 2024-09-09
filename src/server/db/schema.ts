@@ -182,3 +182,11 @@ export const projectTasksRelations = relations(project_tasks, ({ one }) => ({
     references: [projects.id],
   }),
 }));
+
+export const project_columns = createTable("project_task_columns", {
+  id: text("id")
+    .primaryKey()
+    .$default(() => sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  projectId: text("project_id").notNull(),
+});

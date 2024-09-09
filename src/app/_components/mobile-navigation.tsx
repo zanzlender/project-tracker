@@ -35,13 +35,13 @@ export default function MobileNavigation({
             <div className="flex w-full flex-col gap-4">
               {NAVIGATION_ITEMS.map((item) => {
                 return (
-                  <Link href={item.url} className="w-full">
+                  <Link
+                    href={item.url}
+                    className="w-full"
+                    key={`nav-item-id-${item.url}`}
+                  >
                     <SheetClose className="w-full">
-                      <Button
-                        key={`nav-item-id-${item.url}`}
-                        variant={"outline"}
-                        className="w-full"
-                      >
+                      <Button variant={"outline"} className="w-full">
                         {item.displayName}
                       </Button>
                     </SheetClose>
