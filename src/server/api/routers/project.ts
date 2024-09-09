@@ -12,7 +12,9 @@ import {
 import {
   CreateNewProjectTask,
   GetProjectTasks,
+  UpdateAllProjectTasks,
   UpdateProjectTask,
+  UpdateTask,
 } from "~/server/db/_project_tasks";
 import {
   CanUserAccessProject,
@@ -31,6 +33,7 @@ import {
   updateProjectSchema,
 } from "~/server/db/zod-schemas/project";
 import {
+  updateAllColumnsSchema,
   UpdateTaskSchema,
   UpdateTasksSchema,
 } from "~/server/db/zod-schemas/project-tasks";
@@ -204,10 +207,12 @@ export const projectsRouter = createTRPCRouter({
         userId: ctx.currentUser.id,
       });
 
-      console.log("TSK", response?.tasks);
-
-      const kanbanColumns: KanbanColumn[] = [...DEFAULT_KANBAN_COLUMNS];
-      console.log("KB1", kanbanColumns);
+      const kanbanColumns: KanbanColumn[] = [
+        { id: "1", title: "Backlog 🚦", tasks: [] },
+        { id: "2", title: "In progress 🕴", tasks: [] },
+        { id: "3", title: "Needs review ⛑", tasks: [] },
+        { id: "4", title: "Completed ✅", tasks: [] },
+      ];
 
       response?.tasks.forEach((task) => {
         const foundColumnIndex = kanbanColumns.findIndex(
@@ -219,13 +224,16 @@ export const projectsRouter = createTRPCRouter({
           const backlogColumnIndex = kanbanColumns.findIndex(
             (x) => x.id === "1",
           );
-          if (backlogColumnIndex) {
-            kanbanColumns[backlogColumnIndex]?.tasks.push(task);
-          }
+          kanbanColumns[backlogColumnIndex]?.tasks.push({
+            ...task,
+            column: "1",
+          });
         }
       });
 
-      console.log("KB2", kanbanColumns);
+      kanbanColumns.forEach((_, idx) => {
+        kanbanColumns[idx]?.tasks.sort((a, b) => a.position - b.position);
+      });
 
       return kanbanColumns;
     }),
@@ -251,18 +259,31 @@ export const projectsRouter = createTRPCRouter({
       return response;
     }),
 
-  updateTask: protectedProcedure
-    .input(UpdateTaskSchema)
+  updateTasks: protectedProcedure
+    .input(updateAllColumnsSchema)
     .mutation(async ({ ctx, input }) => {
-      const response = await UpdateProjectTask({
-        id: input.id,
-        column: input.column,
-        description: input.description,
-        title: input.title,
-        badges: input.badges,
-        authorId: ctx.currentUser.id,
+      const allTasks = [];
+
+      for (const column of input) {
+        for (const task of column.tasks) {
+          console.log("T", task);
+          allTasks.push({
+            ...task,
+          });
+        }
+      }
+
+      const response = await UpdateAllProjectTasks({
+        userId: ctx.currentUser.id,
+        tasks: allTasks,
       });
 
-      return response;
+      if (!response) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+        });
+      }
+
+      return true;
     }),
 });

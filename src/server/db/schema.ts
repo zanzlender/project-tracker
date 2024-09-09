@@ -12,6 +12,7 @@ import {
   primaryKey,
   json,
   serial,
+  integer,
 } from "drizzle-orm/pg-core";
 
 /**
@@ -167,6 +168,10 @@ export const project_tasks = createTable("project_tasks", {
   description: text("description").notNull(),
   badges: text("badges").array(),
   column: text("column").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+  position: integer("position").notNull().default(0),
 });
 
 export type InsertProjectTask = typeof project_tasks.$inferInsert;

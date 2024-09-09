@@ -24,14 +24,16 @@ import { CSS } from "@dnd-kit/utilities";
 import { useEffect, useState } from "react";
 import clsx from "clsx";
 import { Badge } from "~/app/_components/ui/badge";
+import { useDebounce } from "@uidotdev/usehooks";
 
 import { AddTaskSheet } from "./add-task";
 import { api } from "~/trpc/react";
 import { type KanbanColumn as Column } from "~/lib/constants";
-import { inferRouterOutputs } from "@trpc/server";
-import { AppRouter } from "~/server/api/root";
+import { type inferRouterOutputs } from "@trpc/server";
+import { type AppRouter } from "~/server/api/root";
+import { toast } from "sonner";
 
-export default function KanbanBoard333({
+export default function KanbanBoard({
   columns,
   projectId,
 }: {
@@ -40,6 +42,7 @@ export default function KanbanBoard333({
 }) {
   const trpcUtils = api.useUtils();
   const [_columns, setColumns] = useState(() => columns);
+  const debouncedColumns = useDebounce(_columns, 1000);
   const [activeColumnId, setActiveColumndId] =
     useState<UniqueIdentifier | null>(null);
   const activeColumn =
@@ -49,25 +52,34 @@ export default function KanbanBoard333({
   );
   const activeTask = activeTaskId && findTaskObjectById(activeTaskId);
 
-  const updateTasksMutation = api.project.updateTask.useMutation();
+  const updateTasksMutation = api.project.updateTasks.useMutation();
 
-  const handleUpdateColumns = async (props: {
-    id: string;
-    description: string;
-    title: string;
-    badges: string[];
-    column: string;
-  }) => {
-    updateTasksMutation.mutate({
-      id: props.id,
-      badges: props.badges,
-      column: props.column,
-      description: props.description,
-      title: props.title,
+  async function handleUpdateColumns(props: Column[]) {
+    const allTasks = props.map((column, idx) => {
+      return {
+        id: column.id,
+        title: column.title,
+        tasks: column.tasks.map((y) => {
+          return {
+            id: y.id,
+            title: y.title,
+            description: y.description,
+            badges: y.badges ?? [],
+            column: column.id,
+            position: idx,
+          };
+        }),
+      };
     });
-
-    await trpcUtils.project.getTasksForProject.invalidate();
-  };
+    updateTasksMutation.mutate(allTasks);
+  }
+  // Debounce updates columns on change
+  useEffect(() => {
+    handleUpdateColumns(debouncedColumns).catch((err) => {
+      console.error(err);
+      toast("Could not save your changes. Please try again.");
+    });
+  }, [debouncedColumns]);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -309,14 +321,6 @@ export default function KanbanBoard333({
       if (removeditem?.[0]) {
         newItems[overContainerIndex]?.tasks.push(removeditem[0]);
         setColumns(newItems);
-        console.log("HERE2131232");
-        handleUpdateColumns({
-          badges: removeditem[0]?.badges ?? [],
-          column: overContainer.id,
-          description: removeditem[0].description,
-          id: removeditem[0].id,
-          title: removeditem[0].title,
-        }).catch((err) => console.log(err));
       }
     }
     setActiveTaskId(null);
@@ -350,9 +354,9 @@ export default function KanbanBoard333({
     props: inferRouterOutputs<AppRouter>["project"]["createTask"],
   ) => {
     const newData = [..._columns];
-    const containerIdx = _columns.findIndex((col) => col.id === activeColumnId);
+    const containerIdx = _columns.findIndex((col) => col.id === props.column);
 
-    if (!containerIdx) return;
+    if (containerIdx === -1) return;
 
     newData[containerIdx]?.tasks.push({
       id: props.id,
@@ -363,6 +367,8 @@ export default function KanbanBoard333({
       column: props.column,
       author: props.author,
       projectId: props.projectId,
+      position: props.position,
+      createdAt: new Date(),
     });
 
     setColumns(newData);
@@ -462,8 +468,8 @@ function KanbanColumn(
         isDragging && "opacity-70",
       )}
     >
-      <div className="grid h-full w-full auto-cols-min grid-flow-row grid-cols-1 grid-rows-[auto_1fr_auto] overflow-x-hidden">
-        <div className="w-full flex-grow-0 bg-gray-400 p-3">
+      <div className="grid h-full w-full auto-cols-min grid-flow-row grid-cols-1 grid-rows-[auto_1fr_auto] overflow-x-hidden shadow-xl">
+        <div className="w-full flex-grow-0 bg-indigo-300 p-3">
           <span className="font-semibold">{props.title}</span>
         </div>
         <SortableContext
@@ -473,7 +479,7 @@ function KanbanColumn(
         >
           <div
             ref={setNodeRef}
-            className="relative flex min-h-[300px] w-full flex-col gap-2 overflow-x-hidden bg-red-500 p-2"
+            className="relative flex min-h-[300px] w-full flex-col gap-2 overflow-x-hidden p-2"
           >
             {props.tasks.map((task) => {
               return (
@@ -489,7 +495,7 @@ function KanbanColumn(
           </div>
         </SortableContext>
 
-        <div className="w-full bg-gray-400 p-3">
+        <div className="w-full bg-indigo-300 p-3">
           <AddTaskSheet
             onAfterCreateTask={props.onAfterCreateTask}
             column={props.id.toString()}
@@ -538,12 +544,17 @@ export function DraggableTask({
       {...listeners}
       {...attributes}
       className={clsx(
-        "w-full rounded-md border bg-gray-400 p-3 transition-opacity duration-200",
+        "z-50 w-full rounded-md border bg-gray-50 p-3 shadow-md transition-opacity duration-200",
         isDragging && "scale-[101%] opacity-50",
       )}
     >
-      <p className="font-bold">{title}</p>
-      <p className="mb-2">{description}</p>
+      <div className="flex w-full flex-row justify-between gap-3">
+        <div>
+          <p className="font-bold">{title}</p>
+          <p className="mb-2">{description}</p>
+        </div>
+        <div className="h-4 w-4 bg-blue-500"></div>
+      </div>
       <div className="flex flex-row gap-1">
         {badges?.map((badge, idx) => {
           return <Badge key={`badge-${idx}-${badge}`}>{badge}</Badge>;

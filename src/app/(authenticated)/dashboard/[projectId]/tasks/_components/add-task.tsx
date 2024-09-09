@@ -32,7 +32,6 @@ export function AddTaskSheet({ projectId, column, onAfterCreateTask }: Props) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [badges, setBadges] = useState([]);
-  const trpcUtils = api.useUtils();
 
   const createNewTaskMutation = api.project.createTask.useMutation({
     onError: () => {
@@ -47,13 +46,14 @@ export function AddTaskSheet({ projectId, column, onAfterCreateTask }: Props) {
         description: data.description,
         id: data.id,
         title: data.title,
-        badges: data.badges ?? [],
+        badges: data.badges,
         authorId: data.authorId,
         column: data.column,
         projectId: data.projectId,
         author: data.author,
+        createdAt: data.createdAt,
+        position: data.position,
       });
-      //await trpcUtils.project.getTasksForProject.invalidate();
       setIsOpen(false);
     },
   });
