@@ -22,7 +22,7 @@ export default function LoggedInLayout({
       <div className="flex h-full min-h-full w-full flex-shrink-0 flex-grow flex-col overflow-x-hidden sm:flex-row">
         <div className="relative flex w-full flex-grow flex-col sm:flex-row">
           {/* DESKTOP SIDEBAR */}
-          <div className="hidden w-72 shrink-0 flex-col justify-between bg-gray-100 shadow sm:relative sm:flex md:h-full">
+          <div className="hidden w-72 shrink-0 flex-col justify-between border-r border-gray-200 bg-gray-100 shadow sm:relative sm:flex md:h-full">
             <ul className="mt-12">
               {sidebarItems.map((item, idx) => {
                 const isActiveLink = pathname === item.url;
@@ -44,7 +44,7 @@ export default function LoggedInLayout({
             </ul>
           </div>
 
-          <div className="z-20 flex h-12 w-full flex-row items-center justify-start gap-2 border-b-2 bg-gray-100 p-2 sm:hidden">
+          <div className="z-[90] flex h-12 w-full flex-row items-center justify-start gap-2 border-b-2 bg-gray-100 p-2 sm:hidden">
             <Button
               onClick={() => setIsMobileNavOpen((prev) => !prev)}
               variant={"ghost"}
@@ -56,7 +56,7 @@ export default function LoggedInLayout({
 
           {/** MOBILE SIDEBAR */}
           <div
-            className={`absolute z-10 ${isMobileNavOpen ? "flex" : "hidden"} min-h-[50%] w-64 flex-col justify-between bg-gray-100 shadow-lg transition duration-150 ease-in-out sm:hidden md:h-full`}
+            className={`absolute z-[80] border border-gray-300 ${isMobileNavOpen ? "flex" : "hidden"} min-h-[50%] w-64 flex-col justify-between bg-gray-100 shadow-lg transition duration-150 ease-in-out sm:hidden md:h-full`}
             id="mobile-nav"
           >
             <ul className="mt-12">

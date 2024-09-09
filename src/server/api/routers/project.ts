@@ -204,10 +204,15 @@ export const projectsRouter = createTRPCRouter({
         userId: ctx.currentUser.id,
       });
 
-      console.log("TSK", response?.tasks);
+      console.log("TSK", response?.tasks.length);
 
-      const kanbanColumns: KanbanColumn[] = [...DEFAULT_KANBAN_COLUMNS];
-      console.log("KB1", kanbanColumns);
+      const kanbanColumns: KanbanColumn[] = [
+        { id: "1", title: "Backlog 🚦", tasks: [] },
+        { id: "2", title: "In progress 🕴", tasks: [] },
+        { id: "3", title: "Needs review ⛑", tasks: [] },
+        { id: "4", title: "Completed ✅", tasks: [] },
+      ];
+      console.log("TSK", kanbanColumns);
 
       response?.tasks.forEach((task) => {
         const foundColumnIndex = kanbanColumns.findIndex(
@@ -219,6 +224,7 @@ export const projectsRouter = createTRPCRouter({
           const backlogColumnIndex = kanbanColumns.findIndex(
             (x) => x.id === "1",
           );
+          console.log("BG", backlogColumnIndex);
           if (backlogColumnIndex) {
             kanbanColumns[backlogColumnIndex]?.tasks.push(task);
           }

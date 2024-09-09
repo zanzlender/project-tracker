@@ -1,17 +1,22 @@
-import { api } from "~/trpc/server";
-import { Suspense } from "react";
-import KanbanBoard333 from "./_components/kanban-board";
+"use client";
 
-export default async function TasksPage({
+import { api } from "~/trpc/react";
+import { Suspense } from "react";
+import KanbanBoard from "./_components/kanban-board";
+
+export default function TasksPage({
   params,
 }: {
   params: { projectId: string };
 }) {
-  const columns = await api.project.getTasksForProject({
-    projectId: params.projectId,
-  });
-
-  console.log(columns);
+  const columns = api.project.getTasksForProject.useQuery(
+    {
+      projectId: params.projectId,
+    },
+    {
+      staleTime: 0,
+    },
+  );
 
   return (
     <>
@@ -20,7 +25,12 @@ export default async function TasksPage({
           <span className="text-2xl font-semibold"> Task manager</span>
 
           <Suspense>
-            <KanbanBoard333 projectId={params.projectId} columns={columns} />
+            {columns.data && (
+              <KanbanBoard
+                projectId={params.projectId}
+                columns={columns.data ?? []}
+              />
+            )}
           </Suspense>
         </div>
       </div>
