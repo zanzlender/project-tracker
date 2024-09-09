@@ -54,14 +54,14 @@ export default async function LoggedInLayout({
           <div className="flex gap-4">
             <Suspense>
               <Notifications key={"desktop-notifications-2"} />
+              <MobileNavigation
+                projects={projects.map((project) => ({
+                  id: project.id,
+                  name: project.name ?? "",
+                  url: `/dashboard/${project.id}/overview`,
+                }))}
+              />
             </Suspense>
-            <MobileNavigation
-              projects={projects.map((project) => ({
-                id: project.id,
-                name: project.name ?? "",
-                url: `/dashboard/${project.id}/overview`,
-              }))}
-            />
           </div>
         </div>
       </header>

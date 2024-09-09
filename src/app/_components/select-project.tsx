@@ -10,12 +10,11 @@ import {
 } from "~/app/_components/ui/dropdown-menu";
 import { Button } from "./ui/button";
 import { ChevronDown } from "lucide-react";
+import { SheetClose } from "./ui/sheet";
 
 export default async function SelectProject({
   projects,
-  onSelect,
 }: {
-  onSelect?: () => void;
   projects: {
     name: string;
     id: string;
@@ -39,9 +38,10 @@ export default async function SelectProject({
                 <Link
                   key={`project-select-item-${project.id}`}
                   href={project.url}
-                  onClick={onSelect}
                 >
-                  <DropdownMenuItem>{project.name}</DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <SheetClose>{project.name}</SheetClose>
+                  </DropdownMenuItem>
                 </Link>
               );
             })}

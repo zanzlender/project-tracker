@@ -7,6 +7,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { TRPCReactProvider } from "~/trpc/react";
 import { cn } from "~/lib/utils";
 import { Toaster } from "~/app/_components/ui/sonner";
+import PlausibleProvider from "next-plausible";
 
 const fontSans = FontSans({
   subsets: ["latin"],
@@ -24,21 +25,23 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <ClerkProvider>
-      <html lang="en" className={`${fontSans.variable}`}>
-        <body
-          className={cn(
-            "flex min-h-screen w-screen flex-col overflow-x-hidden bg-background font-sans antialiased",
-          )}
-        >
-          <TRPCReactProvider>{children}</TRPCReactProvider>
-          <Toaster
-            toastOptions={{
-              closeButton: true,
-            }}
-          />
-        </body>
-      </html>
-    </ClerkProvider>
+    <PlausibleProvider domain="projectplanner.online">
+      <ClerkProvider>
+        <html lang="en" className={`${fontSans.variable}`}>
+          <body
+            className={cn(
+              "flex min-h-screen w-screen flex-col overflow-x-hidden bg-background font-sans antialiased",
+            )}
+          >
+            <TRPCReactProvider>{children}</TRPCReactProvider>
+            <Toaster
+              toastOptions={{
+                closeButton: true,
+              }}
+            />
+          </body>
+        </html>
+      </ClerkProvider>
+    </PlausibleProvider>
   );
 }

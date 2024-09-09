@@ -4,12 +4,14 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
+  SheetClose,
 } from "~/app/_components/ui/sheet";
 import { NAVIGATION_ITEMS } from "~/lib/constants";
 import { Button } from "./ui/button";
 import SelectProject from "./select-project";
 import { SignOutButton } from "@clerk/nextjs";
 import { MenuIcon } from "lucide-react";
+import Link from "next/link";
 
 export default function MobileNavigation({
   projects,
@@ -22,7 +24,7 @@ export default function MobileNavigation({
 }) {
   return (
     <>
-      <Sheet aria-describedby={undefined}>
+      <Sheet>
         <SheetTrigger>
           <MenuIcon />
         </SheetTrigger>
@@ -33,9 +35,17 @@ export default function MobileNavigation({
             <div className="flex w-full flex-col gap-4">
               {NAVIGATION_ITEMS.map((item) => {
                 return (
-                  <Button key={`nav-item-id-${item.url}`} variant={"outline"}>
-                    {item.displayName}
-                  </Button>
+                  <Link href={item.url} className="w-full">
+                    <SheetClose className="w-full">
+                      <Button
+                        key={`nav-item-id-${item.url}`}
+                        variant={"outline"}
+                        className="w-full"
+                      >
+                        {item.displayName}
+                      </Button>
+                    </SheetClose>
+                  </Link>
                 );
               })}
 

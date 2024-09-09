@@ -538,7 +538,7 @@ export function DraggableTask({
       {...listeners}
       {...attributes}
       className={clsx(
-        "z-50 w-full rounded-md border bg-gray-400 p-3 transition-opacity duration-200",
+        "w-full rounded-md border bg-gray-400 p-3 transition-opacity duration-200",
         isDragging && "scale-[101%] opacity-50",
       )}
     >

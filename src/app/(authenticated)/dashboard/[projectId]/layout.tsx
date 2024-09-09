@@ -68,6 +68,7 @@ export default function LoggedInLayout({
                     <Link
                       href={item.url}
                       className={`flex w-full cursor-pointer items-center justify-between px-8 py-3 text-gray-800 transition-all duration-150 ${isActiveLink ? "bg-gray-200 font-semibold" : "hover:bg-amber-400 hover:font-semibold"}`}
+                      onClick={() => setIsMobileNavOpen(false)}
                     >
                       <div className="flex items-center">
                         {item.icon}

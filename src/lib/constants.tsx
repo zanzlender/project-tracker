@@ -42,8 +42,12 @@ export const DASHBOARD_SIDEBAR_LINKS = (
 
 export const NAVIGATION_ITEMS = [
   {
-    displayName: "Dashboard",
+    displayName: "Home",
     url: "/",
+  },
+  {
+    displayName: "Dashboard",
+    url: "/dashboard",
   },
 ];
 

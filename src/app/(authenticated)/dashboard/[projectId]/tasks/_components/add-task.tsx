@@ -28,6 +28,7 @@ type Props = {
 };
 
 export function AddTaskSheet({ projectId, column, onAfterCreateTask }: Props) {
+  const [isOpen, setIsOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [badges, setBadges] = useState([]);
@@ -52,7 +53,8 @@ export function AddTaskSheet({ projectId, column, onAfterCreateTask }: Props) {
         projectId: data.projectId,
         author: data.author,
       });
-      await trpcUtils.project.getTasksForProject.invalidate();
+      //await trpcUtils.project.getTasksForProject.invalidate();
+      setIsOpen(false);
     },
   });
 
@@ -67,7 +69,7 @@ export function AddTaskSheet({ projectId, column, onAfterCreateTask }: Props) {
   };
 
   return (
-    <Sheet>
+    <Sheet open={isOpen} onOpenChange={() => setIsOpen((prev) => !prev)}>
       <SheetTrigger asChild>
         <Button
           variant="ghost"
@@ -111,8 +113,13 @@ export function AddTaskSheet({ projectId, column, onAfterCreateTask }: Props) {
           </div>
 
           <div className="mt-4 w-full">
-            <Button type="button" className="w-full" onClick={handleCreateTask}>
-              Create task
+            <Button
+              disabled={createNewTaskMutation.isPending}
+              type="button"
+              className="w-full"
+              onClick={handleCreateTask}
+            >
+              {createNewTaskMutation.isPending ? "Saving..." : "Create task"}
             </Button>
           </div>
         </div>
