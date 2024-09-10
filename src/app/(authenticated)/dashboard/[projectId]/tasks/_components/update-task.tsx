@@ -90,10 +90,9 @@ export function UpdateTaskSheet({
     >
       <SheetContent className="flex w-full max-w-2xl flex-col gap-4">
         <SheetHeader>
-          <SheetTitle>Create new task</SheetTitle>
+          <SheetTitle>Update task</SheetTitle>
           <SheetDescription>
-            Create a new task for the project! It will automaticall be placed in
-            the Backlog column, but you can move it anywhere later.
+            Update and save modified task data!
           </SheetDescription>
         </SheetHeader>
 
