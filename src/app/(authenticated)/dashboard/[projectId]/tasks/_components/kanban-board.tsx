@@ -20,6 +20,7 @@ import {
   sortableKeyboardCoordinates,
   useSortable,
 } from "@dnd-kit/sortable";
+
 import { CSS } from "@dnd-kit/utilities";
 import { useEffect, useState } from "react";
 import clsx from "clsx";
@@ -33,6 +34,9 @@ import { type inferRouterOutputs } from "@trpc/server";
 import { type AppRouter } from "~/server/api/root";
 import { toast } from "sonner";
 import _debounce from "lodash.debounce";
+import Link from "next/link";
+import { UpdateTaskSheet } from "./update-task";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 export default function KanbanBoard({
   columns,
@@ -41,7 +45,6 @@ export default function KanbanBoard({
   columns: Column[];
   projectId: string;
 }) {
-  const trpcUtils = api.useUtils();
   const [_columns, setColumns] = useState(() => columns);
   const debouncedColumns = useDebounce(_columns, 1000);
   const [activeColumnId, setActiveColumndId] =
@@ -83,7 +86,11 @@ export default function KanbanBoard({
   }, [debouncedColumns]);
 
   const sensors = useSensors(
-    useSensor(PointerSensor),
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 10,
+      },
+    }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     }),
@@ -101,7 +108,6 @@ export default function KanbanBoard({
   };
 
   const handleDragMove = (event: DragMoveEvent) => {
-    console.log("MOVE");
     const { active, over } = event;
 
     // Handle Items Sorting
@@ -241,7 +247,7 @@ export default function KanbanBoard({
     }
   }
 
-  function findTaskObjectById(id: UniqueIdentifier) {
+  function findTaskObjectById(id: UniqueIdentifier | string) {
     let foundTask = null;
 
     for (const col of _columns) {
@@ -277,6 +283,47 @@ export default function KanbanBoard({
     });
 
     setColumns(newData);
+  };
+
+  const updateTaskId = useSearchParams();
+  const router = useRouter();
+  const pathName = usePathname();
+  const taskId = updateTaskId.get("taskId");
+  const taskToUpdate = taskId && findTaskObjectById(taskId);
+
+  const handleUpdateSingleTask = ({
+    taskId,
+    badges,
+    title,
+    description,
+  }: {
+    taskId: string;
+    title: string;
+    description: string;
+    badges: string[];
+  }) => {
+    let found = false;
+
+    const newArray = [..._columns].map((col) => {
+      return {
+        ...col,
+        tasks: col.tasks.map((task) => {
+          if (task.id === taskId) {
+            found = true;
+            return {
+              ...task,
+              title: title,
+              description: description,
+              badges: badges,
+            };
+          }
+          return task;
+        }),
+      };
+    });
+
+    if (found) setColumns(newArray);
+    router.push(pathName);
   };
 
   return (
@@ -329,6 +376,17 @@ export default function KanbanBoard({
               />
             )} */}
           </DragOverlay>
+
+          {taskToUpdate && (
+            <UpdateTaskSheet
+              badges={taskToUpdate.badges ?? []}
+              column={taskToUpdate.column}
+              description={taskToUpdate.description}
+              taskId={taskToUpdate.id}
+              title={taskToUpdate.title}
+              updateTask={handleUpdateSingleTask}
+            />
+          )}
         </div>
       </DndContext>
     </>
@@ -453,18 +511,25 @@ export function DraggableTask({
         isDragging && "scale-[101%] opacity-50",
       )}
     >
-      <div className="flex w-full flex-row justify-between gap-3">
-        <div>
-          <p className="font-bold">{title}</p>
-          <p className="mb-2">{description}</p>
+      <Link
+        href={`/dashboard/723c389b-8e3c-495b-8d8d-744c5b366fbd/tasks?taskId=${id}`}
+      >
+        <div className="flex w-full flex-row justify-between gap-3">
+          <div>
+            <p className="font-bold">{title}</p>
+            <p className="mb-2">{description}</p>
+          </div>
         </div>
-        <div className="h-4 w-4 rounded-full bg-blue-500"></div>
-      </div>
-      <div className="flex flex-row gap-1">
-        {badges?.map((badge, idx) => {
-          return <Badge key={`badge-${idx}-${badge}`}>{badge}</Badge>;
-        })}
-      </div>
+        <div className="flex h-fit flex-row gap-1 overflow-hidden">
+          {badges?.map((badge, idx) => {
+            return (
+              <Badge className="h-fit py-0" key={`badge-${idx}-${badge}`}>
+                {badge}
+              </Badge>
+            );
+          })}
+        </div>
+      </Link>
     </div>
   );
 }

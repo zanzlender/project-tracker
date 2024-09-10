@@ -18,9 +18,14 @@ import { api } from "~/trpc/react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { type z } from "zod";
+import { useRef } from "react";
+import TiptapEditor, {
+  type TiptapEditorForwardedRefProps,
+} from "~/app/_components/tiptap-editor";
 
 export function CreateProjectForm() {
   const router = useRouter();
+  const tiptapEditorRef = useRef<TiptapEditorForwardedRefProps>(null);
 
   const createProjectMutation = api.project.createProject.useMutation({
     onError: ({ message }) => {
@@ -41,18 +46,18 @@ export function CreateProjectForm() {
   });
 
   async function onSubmit(values: z.infer<typeof createProjectSchema>) {
+    const jsonContentData = tiptapEditorRef.current?.getEditorData();
+
     createProjectMutation.mutate({
       name: values.name,
       description: values.description,
+      content: jsonContentData,
     });
   }
 
   return (
     <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(onSubmit)}
-        className="w-full max-w-xl space-y-8"
-      >
+      <form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-8">
         <FormField
           control={form.control}
           name="name"
@@ -83,6 +88,18 @@ export function CreateProjectForm() {
             </FormItem>
           )}
         />
+
+        <FormItem>
+          <FormLabel>Content</FormLabel>
+          <FormControl>
+            <TiptapEditor
+              key="tiptap-editor-create-project"
+              ref={tiptapEditorRef}
+            />
+          </FormControl>
+          <FormMessage />
+        </FormItem>
+
         <Button
           className="mt-2 w-full"
           type="submit"

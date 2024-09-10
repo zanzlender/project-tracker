@@ -16,6 +16,8 @@ export default async function ProjectPage({
       redirect("/dashboard");
     });
 
+  void api.project.getTasksForProject.prefetch({ projectId: params.projectId });
+
   return (
     <>
       <div className="flex w-full flex-col gap-4 p-6 lg:px-8">

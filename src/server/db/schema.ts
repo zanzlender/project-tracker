@@ -14,6 +14,7 @@ import {
   serial,
   integer,
 } from "drizzle-orm/pg-core";
+import { EditorContent } from "~/app/_components/tiptap-editor";
 
 /**
  * This is an example of how to use the multi-project schema feature of Drizzle ORM. Use the same
@@ -64,6 +65,7 @@ export const projects = createTable(
       .$default(() => sql`gen_random_uuid()`),
     name: varchar("name", { length: 256 }),
     description: text("description").notNull(),
+    content: json("content").$type<EditorContent>(),
     authorId: text("author_id").notNull(),
     createdAt: timestamp("created_at", { withTimezone: true })
       .default(sql`CURRENT_TIMESTAMP`)

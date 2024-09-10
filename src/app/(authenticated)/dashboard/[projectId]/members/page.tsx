@@ -15,7 +15,6 @@ import {
 import InviteUserDialog from "./_components/invite-user";
 import InvitesActionDropdown from "./_components/invites-actions-dropdown";
 import MembersActionDropdown from "./_components/members-actions-dropdown";
-import { revalidatePath } from "next/cache";
 
 export default async function ProjectPage({
   params,
@@ -30,7 +29,12 @@ export default async function ProjectPage({
       redirect("/dashboard");
     });
 
-  revalidatePath("/dashboard");
+  void api.project.getTasksForProject.prefetch(
+    { projectId: params.projectId },
+    {
+      staleTime: 1000,
+    },
+  );
 
   const { userId } = auth();
   const isUserOwner = project.authorId === userId;

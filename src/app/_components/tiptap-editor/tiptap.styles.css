@@ -1,0 +1,62 @@
+/* HEADINGS */
+
+.tiptap h1 {
+  font-weight: 800;
+  font-size: 1.35rem;
+  margin-bottom: 10px;
+}
+.tiptap h2 {
+  font-weight: 700;
+  font-size: 1.25rem;
+  margin-bottom: 10px;
+}
+.tiptap h3 {
+  font-weight: 500;
+  font-size: 1.15rem;
+  margin-bottom: 10px;
+}
+
+/* CODEBLOCK */
+
+.tiptap-editor__codeblock {
+  background-color: #cfcfcf;
+  padding: 2px 8px;
+  margin: 0 10px;
+  list-style-position: inside;
+}
+
+/* LISTS */
+
+.tiptap-editor__list__ordered li {
+  list-style-type: circle;
+  margin-left: 30px;
+}
+
+/* TASK LIST */
+
+.tiptap-editor__taskList li {
+  display: flex;
+  flex-direction: row;
+  align-items: start;
+  gap: 6px;
+  margin-left: 10px;
+}
+
+/* TABLE */
+
+.tiptap table {
+  min-width: 60%;
+  border: 1px solid #c7c7c7;
+}
+
+.tiptap table,
+th,
+td {
+  border: 1px solid #c7c7c7;
+  padding: 5px;
+}
+
+.tiptap .tableWrapper {
+  overflow-x: auto;
+  width: 100%;
+}

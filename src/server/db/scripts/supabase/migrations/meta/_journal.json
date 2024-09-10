@@ -8,6 +8,13 @@
       "when": 1725904846499,
       "tag": "0000_clammy_spirit",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1725978176924,
+      "tag": "0001_great_ghost_rider",
+      "breakpoints": true
     }
   ]
 }

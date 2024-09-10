@@ -67,3 +67,22 @@ export const DEFAULT_KANBAN_COLUMNS: KanbanColumn[] = [
   { id: "3", title: "Needs review ⛑", tasks: [] },
   { id: "4", title: "Completed ✅", tasks: [] },
 ];
+
+export const DEFAULT_BADGES = [
+  { title: "Important", color: "bg-teal-500" },
+  { title: "Urgent", color: "bg-teal-500" },
+  { title: "High", color: "bg-teal-500" },
+  { title: "Medium", color: "bg-teal-500" },
+  { title: "Low", color: "bg-teal-500" },
+  { title: "Feature", color: "bg-teal-500" },
+  { title: "Bug", color: "bg-teal-500" },
+  { title: "Needs review", color: "bg-teal-500" },
+  { title: "In progress", color: "bg-teal-500" },
+];
+
+export const DEFAULT_BADGES_SELECT = DEFAULT_BADGES.map((b) => {
+  return {
+    label: b.title,
+    value: b.title,
+  };
+});

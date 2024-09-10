@@ -1,9 +1,6 @@
 "use client";
 
-import { type inferRouterOutputs } from "@trpc/server";
-import { PlusIcon } from "lucide-react";
 import { useState } from "react";
-import { toast } from "sonner";
 import { Button } from "~/app/_components/ui/button";
 import { Input } from "~/app/_components/ui/input";
 import { Label } from "~/app/_components/ui/label";
@@ -16,11 +13,8 @@ import {
   SheetTrigger,
 } from "~/app/_components/ui/sheet";
 import { Textarea } from "~/app/_components/ui/textarea";
-import { type AppRouter } from "~/server/api/root";
-import { api } from "~/trpc/react";
 import { DEFAULT_BADGES_SELECT } from "~/lib/constants";
 import { MultiSelect } from "~/app/_components/ui/multi-select";
-import { createTaskSchema } from "~/server/db/zod-schemas/project";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -32,51 +26,42 @@ import {
   FormLabel,
   FormMessage,
 } from "~/app/_components/ui/form";
+import { UpdateTaskSchema } from "~/server/db/zod-schemas/project-tasks";
+import { usePathname, useRouter } from "next/navigation";
 
-type Props = {
-  projectId: string;
+type UpdateTask = {
   column: string;
-  onAfterCreateTask: (
-    props: inferRouterOutputs<AppRouter>["project"]["createTask"],
-  ) => void;
+  badges: string[];
+  taskId: string;
+  title: string;
+  description: string;
 };
 
-export function AddTaskSheet({ projectId, column, onAfterCreateTask }: Props) {
-  const [isSheetOpen, setIsSheetOpen] = useState(false);
-  const [badges, setBadges] = useState<string[]>([]);
+type Props = UpdateTask & {
+  updateTask: (task: UpdateTask) => void;
+};
 
-  const form = useForm<z.infer<typeof createTaskSchema>>({
-    resolver: zodResolver(createTaskSchema),
+export function UpdateTaskSheet({
+  column,
+  badges,
+  taskId,
+  title,
+  description,
+  updateTask,
+}: Props) {
+  const router = useRouter();
+  const pathName = usePathname();
+  const [isSheetOpen, setIsSheetOpen] = useState(true);
+  const [_badges, setBadges] = useState<string[]>(() => badges);
+
+  const form = useForm<z.infer<typeof UpdateTaskSchema>>({
+    resolver: zodResolver(UpdateTaskSchema),
     defaultValues: {
-      badges: [],
+      id: taskId,
+      badges: badges,
       column: column,
-      projectId: projectId,
-      title: "",
-      description: "",
-    },
-  });
-
-  const createNewTaskMutation = api.project.createTask.useMutation({
-    onError: () => {
-      toast("❌ Failed to create new task");
-    },
-    onSuccess: async (data) => {
-      toast("✅ New task created!");
-      setBadges([]);
-      form.reset();
-      onAfterCreateTask({
-        description: data.description,
-        id: data.id,
-        title: data.title,
-        badges: data.badges,
-        authorId: data.authorId,
-        column: data.column,
-        projectId: data.projectId,
-        author: data.author,
-        createdAt: data.createdAt,
-        position: data.position,
-      });
-      setIsSheetOpen(false);
+      title: title,
+      description: description,
     },
   });
 
@@ -84,31 +69,26 @@ export function AddTaskSheet({ projectId, column, onAfterCreateTask }: Props) {
     setBadges(data);
   };
 
-  async function onSubmit(values: z.infer<typeof createTaskSchema>) {
-    createNewTaskMutation.mutate({
+  async function onSubmit(values: z.infer<typeof UpdateTaskSchema>) {
+    updateTask({
+      badges: _badges,
+      taskId: taskId,
       title: values.title,
       description: values.description,
-      badges: badges,
       column: column,
-      projectId: projectId,
     });
+    setIsSheetOpen(false);
   }
 
   return (
     <Sheet
       open={isSheetOpen}
-      onOpenChange={() => setIsSheetOpen((prev) => !prev)}
+      onOpenChange={() => {
+        if (isSheetOpen) router.push(pathName);
+        setIsSheetOpen((prev) => !prev);
+      }}
     >
-      <SheetTrigger asChild>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="flex flex-row items-center gap-1"
-        >
-          <PlusIcon /> Add item
-        </Button>
-      </SheetTrigger>
-      <SheetContent className="flex flex-col gap-4">
+      <SheetContent className="flex w-full max-w-2xl flex-col gap-4">
         <SheetHeader>
           <SheetTitle>Create new task</SheetTitle>
           <SheetDescription>
@@ -157,21 +137,15 @@ export function AddTaskSheet({ projectId, column, onAfterCreateTask }: Props) {
               <MultiSelect
                 options={DEFAULT_BADGES_SELECT}
                 onValueChange={handleSelectBadge}
-                defaultValue={badges}
+                defaultValue={_badges}
                 placeholder="Select badges"
                 variant="inverted"
                 animation={2}
                 maxCount={3}
               />
 
-              <Button
-                className="mt-2 w-full"
-                type="submit"
-                disabled={createNewTaskMutation.isPending}
-              >
-                {createNewTaskMutation.isPending
-                  ? "Creating..."
-                  : "Create task"}
+              <Button className="mt-2 w-full" type="submit">
+                Save changes
               </Button>
             </form>
           </Form>

@@ -74,6 +74,7 @@ export const projectsRouter = createTRPCRouter({
           name: input.name,
           description: input.description,
           authorId: ctx.currentUser.id,
+          content: input.content,
         })
         .returning({ projectId: projectsTable.id });
 
@@ -101,6 +102,7 @@ export const projectsRouter = createTRPCRouter({
         .set({
           name: input.name,
           description: input.description,
+          content: input.content,
         })
         .where(eq(projectsTable.id, input.id))
         .returning({ projectId: projectsTable.id });

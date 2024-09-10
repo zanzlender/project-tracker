@@ -1,6 +1,7 @@
 import { api, HydrateClient } from "~/trpc/server";
 import { Suspense } from "react";
 import KanbanBoard from "./_components/kanban-board";
+import { UpdateTaskSheet } from "./_components/update-task";
 
 export const dynamic = "force-dynamic";
 

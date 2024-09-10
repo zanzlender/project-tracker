@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Button } from "~/app/_components/ui/button";
 import { auth } from "@clerk/nextjs/server";
 import { api } from "~/trpc/server";
+import { generatePattern } from "~/app/_components/generate-svg";
 
 export default async function Dashboard() {
   const { userId } = auth();
@@ -50,7 +51,7 @@ function ProjectCard({
   return (
     <Link href={url}>
       <div className="flex aspect-video w-full min-w-[300px] max-w-[300px] flex-col overflow-hidden rounded-md border shadow-md transition-all duration-200 hover:scale-[102%]">
-        <div className="h-24 w-full bg-red-400"></div>
+        <div className="h-24 w-full bg-red-400" style={generatePattern()}></div>
         <div className="relative p-4">
           <p className="overflow-x-hidden overflow-ellipsis text-lg font-semibold">
             {project.name}
