@@ -500,6 +500,8 @@ export function DraggableTask({
     transition: transition,
   };
 
+  const pathname = usePathname();
+
   return (
     <div
       ref={setNodeRef}
@@ -512,7 +514,7 @@ export function DraggableTask({
       )}
     >
       <Link
-        href={`/dashboard/723c389b-8e3c-495b-8d8d-744c5b366fbd/tasks?taskId=${id}`}
+        href={`${pathname}?taskId=${id}`}
       >
         <div className="flex w-full flex-row justify-between gap-3">
           <div>
