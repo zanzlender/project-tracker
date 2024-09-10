@@ -104,7 +104,8 @@ function findAndReplaceInWord(
     newValue: string | string[];
   }[],
 ) {
-  const svgDataMatch = svgString.match(/url\("data:image\/svg\+xml,(.*?)"\)/);
+  const svgDataRegex = /url\("data:image\/svg\+xml,(.*?)"\)/;
+  const svgDataMatch = svgDataRegex.exec(svgString);
   if (!svgDataMatch || svgDataMatch.length < 2 || !svgDataMatch[1]) {
     throw new Error("Invalid SVG background image string");
   }
