@@ -60,7 +60,6 @@ export const GetProjects = unstable_cache(
   ["projects"],
   {
     tags: ["projects"],
-    revalidate: 0,
   },
 );
 
