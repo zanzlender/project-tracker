@@ -4,13 +4,12 @@ import { auth } from "@clerk/nextjs/server";
 import { api } from "~/trpc/server";
 import { generatePattern } from "~/app/_components/generate-svg";
 import dto from "~/server/db/dto";
-export const revalidate = 0;
 
 export default async function Dashboard() {
   const { userId } = auth();
   if (!userId) return <></>;
 
-  const projects = await api.project.getProjectsForUser();
+  const projects = await dto.GetProjects({ userId });
 
   return (
     <>
