@@ -1,7 +1,7 @@
 import { and, eq, or } from "drizzle-orm";
 import { db } from "..";
 import {
-  InsertProjectUser,
+  type InsertProjectUser,
   projects as projectsTable,
   projects_users as projectsUsersTable,
   users as usersTable,
@@ -9,99 +9,60 @@ import {
 } from "../schema";
 import { unstable_cache } from "next/cache";
 
-export const GetP = unstable_cache(async ({ userId }: { userId: string }) => {
-  const projectsResults = await db
-    .select()
-    .from(projectsTable)
-    .leftJoin(
-      projectsUsersTable,
-      eq(projectsTable.id, projectsUsersTable.projectId),
-    )
-    .where(
-      or(
-        eq(projectsTable.authorId, userId),
-        eq(projectsUsersTable.userId, userId),
-      ),
-    );
+export const GetProjects = unstable_cache(
+  async ({ userId }: { userId: string }) => {
+    const projectsResults = await db
+      .select()
+      .from(projectsTable)
+      .leftJoin(
+        projectsUsersTable,
+        eq(projectsTable.id, projectsUsersTable.projectId),
+      )
+      .where(
+        or(
+          eq(projectsTable.authorId, userId),
+          eq(projectsUsersTable.userId, userId),
+        ),
+      );
 
-  type GetProjectsReturnType = ((typeof projectsResults)[number]["projects"] & {
-    members: (typeof projectsResults)[number]["projects_users"][];
-  })[];
+    type GetProjectsReturnType =
+      ((typeof projectsResults)[number]["projects"] & {
+        members: (typeof projectsResults)[number]["projects_users"][];
+      })[];
 
-  const res = projectsResults.reduce((acc, item) => {
-    const { projects, projects_users } = item;
-    const projectId = projects.id;
+    const res = projectsResults.reduce((acc, item) => {
+      const { projects, projects_users } = item;
+      const projectId = projects.id;
 
-    const existingProject = acc?.find((project) => project.id === projectId);
+      const existingProject = acc?.find((project) => project.id === projectId);
 
-    if (existingProject && projects_users) {
-      existingProject.members.push(projects_users);
-    } else {
-      if (projects_users) {
-        acc.push({
-          ...projects,
-          members: [projects_users],
-        });
+      if (existingProject && projects_users) {
+        existingProject.members.push(projects_users);
       } else {
-        acc.push({
-          ...projects,
-          members: [],
-        });
+        if (projects_users) {
+          acc.push({
+            ...projects,
+            members: [projects_users],
+          });
+        } else {
+          acc.push({
+            ...projects,
+            members: [],
+          });
+        }
       }
-    }
 
-    return acc;
-  }, [] as GetProjectsReturnType);
+      return acc;
+    }, [] as GetProjectsReturnType);
 
-  return res;
-});
-
-export async function GetProjects({ userId }: { userId: string }) {
-  const projectsResults = await db
-    .select()
-    .from(projectsTable)
-    .leftJoin(
-      projectsUsersTable,
-      eq(projectsTable.id, projectsUsersTable.projectId),
-    )
-    .where(
-      or(
-        eq(projectsTable.authorId, userId),
-        eq(projectsUsersTable.userId, userId),
-      ),
-    );
-
-  type GetProjectsReturnType = ((typeof projectsResults)[number]["projects"] & {
-    members: (typeof projectsResults)[number]["projects_users"][];
-  })[];
-
-  const res = projectsResults.reduce((acc, item) => {
-    const { projects, projects_users } = item;
-    const projectId = projects.id;
-
-    const existingProject = acc?.find((project) => project.id === projectId);
-
-    if (existingProject && projects_users) {
-      existingProject.members.push(projects_users);
-    } else {
-      if (projects_users) {
-        acc.push({
-          ...projects,
-          members: [projects_users],
-        });
-      } else {
-        acc.push({
-          ...projects,
-          members: [],
-        });
-      }
-    }
-
-    return acc;
-  }, [] as GetProjectsReturnType);
-
-  return res;
-}
+    return res;
+  },
+  ["projects"],
+  {
+    tags: ["projects"],
+    revalidate: 0,
+  },
+);
 
 export async function CreateProject({
   userId,
