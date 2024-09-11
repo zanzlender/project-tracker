@@ -7,6 +7,9 @@ import dto from "~/server/db/dto";
 import { revalidatePath, revalidateTag, unstable_noStore } from "next/cache";
 import { headers } from "next/headers";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function Dashboard() {
   revalidateTag("projects");
   revalidatePath("/dashboard");
