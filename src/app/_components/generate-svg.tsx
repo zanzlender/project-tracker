@@ -69,7 +69,7 @@ export async function generatePattern({ projectId }: { projectId: string }) {
       coerceToRange(
         Number(String(numericValues[0]).slice(0, 2)),
         0,
-        colorCombinations.length,
+        colorCombinations.length - 1,
       )
     ]?.backgroundColor ?? "hsla(258.5,59.4%,59.4%,1)";
   const foregroundColor =
@@ -77,7 +77,7 @@ export async function generatePattern({ projectId }: { projectId: string }) {
       coerceToRange(
         Number(String(numericValues[1]).slice(0, 2)),
         0,
-        colorCombinations.length,
+        colorCombinations.length - 1,
       )
     ]?.foregroundColor ?? "hsla(340, 82%, 52%, 1)";
 
@@ -86,15 +86,9 @@ export async function generatePattern({ projectId }: { projectId: string }) {
       coerceToRange(
         Number(String(numericValues[2]).slice(0, 2)),
         0,
-        SVGs.length,
+        SVGs.length - 1,
       )
     ];
-
-  console.log("RandomPatternIndex", randomPatternIndex);
-  console.log(
-    "INDEX",
-    coerceToRange(Number(String(numericValues[2]).slice(0, 2)), 0, SVGs.length),
-  );
 
   if (!randomPatternIndex?.image) return;
   let backgroundImage = randomPatternIndex.image;

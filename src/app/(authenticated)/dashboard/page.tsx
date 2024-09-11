@@ -58,7 +58,6 @@ async function ProjectCard({
   project: Awaited<ReturnType<typeof api.project.getProjectsForUser>>[number];
 }) {
   const styles = (await generatePattern({ projectId: project.id })) ?? {};
-  console.log("STYLES", styles);
 
   return (
     <Link href={url}>
