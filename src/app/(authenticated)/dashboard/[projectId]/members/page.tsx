@@ -29,12 +29,14 @@ export default async function ProjectPage({
       redirect("/dashboard");
     });
 
-  void api.project.getTasksForProject.prefetch(
+  void api.project.getProject.prefetch(
     { projectId: params.projectId },
     {
       staleTime: 1000,
     },
   );
+
+  console.log("PPPP", project);
 
   const { userId } = auth();
   const isUserOwner = project.authorId === userId;

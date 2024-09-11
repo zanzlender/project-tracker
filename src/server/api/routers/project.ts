@@ -56,6 +56,8 @@ export const projectsRouter = createTRPCRouter({
         projectId: input.projectId,
       });
 
+      console.log("AC", accessGranted);
+
       if (accessGranted instanceof Error) {
         throw new TRPCError({
           code: "UNAUTHORIZED",
