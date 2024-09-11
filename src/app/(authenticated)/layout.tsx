@@ -50,7 +50,7 @@ export default async function LoggedInLayout({
         {/** MOBILE NAVIGATION */}
         <div className="mx-auto flex h-16 w-full items-center justify-between gap-x-6 p-4 sm:hidden">
           <div>
-            <Link href="/dashboard">
+            <Link href="/dashboard" replace>
               <h1 className="relative flex select-none flex-row items-baseline text-3xl font-bold">
                 PPlanner
               </h1>
