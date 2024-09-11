@@ -4,8 +4,13 @@ import { auth } from "@clerk/nextjs/server";
 import { api } from "~/trpc/server";
 import { generatePattern } from "~/app/_components/generate-svg";
 import dto from "~/server/db/dto";
+import { unstable_noStore } from "next/cache";
+import { headers } from "next/headers";
 
 export default async function Dashboard() {
+  unstable_noStore();
+  headers();
+
   const { userId } = auth();
   if (!userId) return <></>;
 
