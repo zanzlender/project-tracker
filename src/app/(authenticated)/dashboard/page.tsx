@@ -9,7 +9,7 @@ import { headers } from "next/headers";
 
 export default async function Dashboard() {
   revalidateTag("projects");
-  revalidatePath("/");
+  revalidatePath("/dashboard");
   unstable_noStore();
   headers();
 
