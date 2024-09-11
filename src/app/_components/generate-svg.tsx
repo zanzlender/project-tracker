@@ -95,8 +95,8 @@ export async function generatePattern({ projectId }: { projectId: string }) {
 
   const randomStrokeWidth = coerceToRange(
     Number(String(numericValues[3]).slice(0, 2)),
-    1,
-    3,
+    0.1,
+    1.5,
   );
   const randomRotation = coerceToRange(
     Number(String(numericValues[4]).slice(0, 1)),
@@ -105,8 +105,8 @@ export async function generatePattern({ projectId }: { projectId: string }) {
   );
   const randomScale = coerceToRange(
     Number(String(numericValues[4]).slice(0, 1)),
-    1,
-    3,
+    0.5,
+    2.5,
   );
 
   backgroundImage = findAndReplaceInWord(backgroundImage, [
@@ -123,8 +123,6 @@ export async function generatePattern({ projectId }: { projectId: string }) {
       newValue: `scale(${randomScale}) rotate(${randomRotation})`,
     },
   ]);
-
-  console.log(backgroundColor, backgroundImage);
 
   return {
     backgroundColor: backgroundColor,
