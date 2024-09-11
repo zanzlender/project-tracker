@@ -60,21 +60,53 @@ export const SVGs = [
   },
 ];
 
-export function generatePattern() {
+export async function generatePattern({ projectId }: { projectId: string }) {
+  const hash = await hashUUID(projectId);
+  const numericValues = convertHashToNumericValues(hash);
+
   const backgroundColor =
-    colorCombinations[Math.floor(Math.random() * colorCombinations.length)]
-      ?.backgroundColor ?? "hsla(258.5,59.4%,59.4%,1)";
+    colorCombinations[
+      coerceToRange(
+        Number(String(numericValues[0]).slice(0, 2)),
+        0,
+        colorCombinations.length,
+      )
+    ]?.backgroundColor ?? "hsla(258.5,59.4%,59.4%,1)";
   const foregroundColor =
-    colorCombinations[Math.floor(Math.random() * colorCombinations.length)]
-      ?.foregroundColor ?? "hsla(340, 82%, 52%, 1)";
+    colorCombinations[
+      coerceToRange(
+        Number(String(numericValues[1]).slice(0, 2)),
+        0,
+        colorCombinations.length,
+      )
+    ]?.foregroundColor ?? "hsla(340, 82%, 52%, 1)";
 
-  const randomPatternIndex = Math.floor(Math.random() * SVGs.length);
-  if (!SVGs[randomPatternIndex]?.image) return;
-  let backgroundImage = SVGs[randomPatternIndex].image;
+  const randomPatternIndex =
+    SVGs[
+      coerceToRange(
+        Number(String(numericValues[2]).slice(0, 2)),
+        0,
+        SVGs.length,
+      )
+    ];
+  if (!randomPatternIndex?.image) return;
+  let backgroundImage = randomPatternIndex.image;
 
-  const randomStrokeWidth = (Math.random() * 5).toFixed(2) + 1;
-  const randomRotation = (Math.random() * 90).toFixed(2) + 1;
-  const randomScale = (Math.random() * 10).toFixed(2) + 1;
+  const randomStrokeWidth = coerceToRange(
+    Number(String(numericValues[3]).slice(0, 2)),
+    1,
+    3,
+  );
+  const randomRotation = coerceToRange(
+    Number(String(numericValues[4]).slice(0, 1)),
+    0,
+    99,
+  );
+  const randomScale = coerceToRange(
+    Number(String(numericValues[4]).slice(0, 1)),
+    1,
+    3,
+  );
 
   backgroundImage = findAndReplaceInWord(backgroundImage, [
     {
@@ -142,4 +174,44 @@ function findAndReplaceInWord(
 
   // Return the updated background image string
   return `url("data:image/svg+xml,${svgData}")`;
+}
+
+// Function to convert the hash into five numeric values
+function convertHashToNumericValues(hash: string) {
+  const numericValues = [];
+
+  // Split the hash into 5 parts, each part is 12 hex characters (48 bits)
+  for (let i = 0; i < 5; i++) {
+    const part = hash.slice(i * 12, (i + 1) * 12); // 12 characters for each numeric value
+    const numericValue = parseInt(part, 16); // Convert hex to integer
+    numericValues.push(numericValue);
+  }
+
+  return numericValues;
+}
+
+async function hashUUID(uuid: string) {
+  // Encode the UUID as a byte array
+  const encoder = new TextEncoder();
+  const data = encoder.encode(uuid);
+
+  // Hash the UUID with SHA-256
+  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+
+  // Convert the hash buffer to a hex string
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hashHex = hashArray
+    .map((byte) => byte.toString(16).padStart(2, "0"))
+    .join("");
+
+  return hashHex;
+}
+
+function coerceToRange(num: number, min: number, max: number) {
+  // Calculate the modulus with the range size
+  const rangeSize = max - min + 1;
+  const mod = (((num - min) % rangeSize) + rangeSize) % rangeSize; // Ensure positive result
+
+  // Return the number within the range
+  return mod + min;
 }

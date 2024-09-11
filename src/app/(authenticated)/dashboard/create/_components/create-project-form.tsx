@@ -93,6 +93,7 @@ export function CreateProjectForm() {
           <FormLabel>Content</FormLabel>
           <FormControl>
             <TiptapEditor
+              immediatelyRender={false}
               key="tiptap-editor-create-project"
               ref={tiptapEditorRef}
             />

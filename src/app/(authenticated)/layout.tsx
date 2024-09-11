@@ -4,11 +4,17 @@ import { api } from "~/trpc/server";
 import MobileNavigation from "../_components/mobile-navigation";
 import { Suspense } from "react";
 import Notifications from "../_components/notifications";
+import { headers } from "next/headers";
 
 export default async function LoggedInLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  headers();
+
   const projects = await api.project.getProjectsForUser();
+  void api.project.getProjectsForUser.prefetch(undefined, {
+    staleTime: 1000,
+  });
 
   return (
     <>

@@ -39,7 +39,7 @@ export default async function SelectProject({
                   key={`project-select-item-${project.id}`}
                   href={project.url}
                 >
-                  <DropdownMenuItem>
+                  <DropdownMenuItem asChild>
                     <SheetClose>{project.name}</SheetClose>
                   </DropdownMenuItem>
                 </Link>

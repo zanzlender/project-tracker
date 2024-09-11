@@ -61,7 +61,7 @@ export default function MobileNavigation({
                 />
 
                 <SheetClose asChild>
-                  <Button className="w-full" variant={"destructive"}>
+                  <Button asChild className="w-full" variant={"destructive"}>
                     <SignOutButton>Sign out</SignOutButton>
                   </Button>
                 </SheetClose>
