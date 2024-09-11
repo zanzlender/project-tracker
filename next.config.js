@@ -10,6 +10,9 @@ await import("./src/env.js");
 const config = {
   experimental: {
     serverComponentsExternalPackages: ["yjs"],
+    staleTimes: {
+      dynamic: 0,
+    },
   },
 };
 
