@@ -57,13 +57,13 @@ async function ProjectCard({
   url: string;
   project: Awaited<ReturnType<typeof api.project.getProjectsForUser>>[number];
 }) {
+  const styles = (await generatePattern({ projectId: project.id })) ?? {};
+  console.log("STYLES", styles);
+
   return (
     <Link href={url}>
       <div className="flex aspect-video w-full min-w-[300px] max-w-[300px] flex-col overflow-hidden rounded-md border shadow-md transition-all duration-200 hover:scale-[102%]">
-        <div
-          className="h-24 w-full bg-red-400"
-          style={await generatePattern({ projectId: project.id })}
-        ></div>
+        <div className="h-24 w-full" style={styles}></div>
         <div className="relative p-4">
           <p className="overflow-x-hidden overflow-ellipsis text-lg font-semibold">
             {project.name}

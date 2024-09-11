@@ -123,6 +123,8 @@ export async function generatePattern({ projectId }: { projectId: string }) {
     },
   ]);
 
+  console.log(backgroundColor, backgroundImage);
+
   return {
     backgroundColor: backgroundColor,
     backgroundImage: backgroundImage,
