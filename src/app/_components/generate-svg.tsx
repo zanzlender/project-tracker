@@ -89,6 +89,13 @@ export async function generatePattern({ projectId }: { projectId: string }) {
         SVGs.length,
       )
     ];
+
+  console.log("RandomPatternIndex", randomPatternIndex);
+  console.log(
+    "INDEX",
+    coerceToRange(Number(String(numericValues[2]).slice(0, 2)), 0, SVGs.length),
+  );
+
   if (!randomPatternIndex?.image) return;
   let backgroundImage = randomPatternIndex.image;
 
