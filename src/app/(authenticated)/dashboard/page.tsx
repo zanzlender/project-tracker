@@ -1,25 +1,16 @@
 import Link from "next/link";
 import { Button } from "~/app/_components/ui/button";
 import { auth } from "@clerk/nextjs/server";
-import { api } from "~/trpc/server";
+import { type api } from "~/trpc/server";
 import { generatePattern } from "~/app/_components/generate-svg";
-import { revalidatePath, unstable_noStore as noStore } from "next/cache";
-import { headers } from "next/headers";
-export const dynamic = "force-dynamic";
+import dto from "~/server/db/dto";
 export const revalidate = 0;
 
 export default async function Dashboard() {
-  revalidatePath("/dashboard");
-  headers();
-  noStore();
-
   const { userId } = auth();
   if (!userId) return <></>;
 
-  const projects = await api.project.getProjectsForUser();
-  void api.project.getProjectsForUser.prefetch(undefined, {
-    staleTime: 0,
-  });
+  const projects = await dto.GetP({ userId });
 
   return (
     <>

@@ -7,6 +7,54 @@ import {
   users as usersTable,
   type InsertProject,
 } from "../schema";
+import { unstable_cache } from "next/cache";
+
+export const GetP = unstable_cache(async ({ userId }: { userId: string }) => {
+  const projectsResults = await db
+    .select()
+    .from(projectsTable)
+    .leftJoin(
+      projectsUsersTable,
+      eq(projectsTable.id, projectsUsersTable.projectId),
+    )
+    .where(
+      or(
+        eq(projectsTable.authorId, userId),
+        eq(projectsUsersTable.userId, userId),
+      ),
+    );
+
+  type GetProjectsReturnType = ((typeof projectsResults)[number]["projects"] & {
+    members: (typeof projectsResults)[number]["projects_users"][];
+  })[];
+
+  const res = projectsResults.reduce((acc, item) => {
+    const { projects, projects_users } = item;
+    const projectId = projects.id;
+
+    const existingProject = acc?.find((project) => project.id === projectId);
+
+    if (existingProject && projects_users) {
+      existingProject.members.push(projects_users);
+    } else {
+      if (projects_users) {
+        acc.push({
+          ...projects,
+          members: [projects_users],
+        });
+      } else {
+        acc.push({
+          ...projects,
+          members: [],
+        });
+      }
+    }
+
+    return acc;
+  }, [] as GetProjectsReturnType);
+
+  return res;
+});
 
 export async function GetProjects({ userId }: { userId: string }) {
   const projectsResults = await db
