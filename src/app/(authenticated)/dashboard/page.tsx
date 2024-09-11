@@ -3,7 +3,7 @@ import { Button } from "~/app/_components/ui/button";
 import { auth } from "@clerk/nextjs/server";
 import { api } from "~/trpc/server";
 import { generatePattern } from "~/app/_components/generate-svg";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, unstable_noStore as noStore } from "next/cache";
 import { headers } from "next/headers";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -11,6 +11,7 @@ export const revalidate = 0;
 export default async function Dashboard() {
   revalidatePath("/dashboard");
   headers();
+  noStore();
 
   const { userId } = auth();
   if (!userId) return <></>;
