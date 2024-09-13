@@ -513,9 +513,7 @@ export function DraggableTask({
         isDragging && "scale-[101%] opacity-50",
       )}
     >
-      <Link
-        href={`${pathname}?taskId=${id}`}
-      >
+      <Link href={`${pathname}?taskId=${id}`}>
         <div className="flex w-full flex-row justify-between gap-3">
           <div>
             <p className="font-bold">{title}</p>

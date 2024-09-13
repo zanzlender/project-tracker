@@ -233,10 +233,7 @@
       "compositePrimaryKeys": {
         "project-tracker_projects_users_user_id_project_id_pk": {
           "name": "project-tracker_projects_users_user_id_project_id_pk",
-          "columns": [
-            "user_id",
-            "project_id"
-          ]
+          "columns": ["user_id", "project_id"]
         }
       },
       "uniqueConstraints": {}
@@ -296,9 +293,7 @@
         "project-tracker_users_email_unique": {
           "name": "project-tracker_users_email_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         }
       }
     }

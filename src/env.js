@@ -13,6 +13,7 @@ export const env = createEnv({
       .default("development"),
     CLERK_WEBHOOK_SECRET: z.string(),
     CLERK_SECRET_KEY: z.string(),
+    SENTRY_AUTH_TOKEN: z.string(),
   },
 
   /**
@@ -53,6 +54,7 @@ export const env = createEnv({
       process.env.NEXT_PUBLIC_CLERK_SIGN_UP_FORCE_REDIRECT_URL,
     NEXT_PUBLIC_POSTHOG_KEY: process.env.NEXT_PUBLIC_POSTHOG_KEY,
     NEXT_PUBLIC_POSTHOG_HOST: process.env.NEXT_PUBLIC_POSTHOG_HOST,
+    SENTRY_AUTH_TOKEN: process.env.SENTRY_AUTH_TOKEN,
     // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
   },
   /**
