@@ -1,0 +1,16 @@
+[comit]
+  gpgsign = true
+[gpg]
+  program = Z:\Programs\GnuPG\bin
+[init] 
+  defaultBranch = main
+
+[push]
+  autoSetupRemote = true
+  default = current
+
+[alias]
+  undo = reset --soft HEAD*
+
+[core]
+  pager = delta
