@@ -15,6 +15,12 @@ export default async function LoggedInLayout({
   void api.project.getProjectsForUser.prefetch(undefined, {
     staleTime: 1000,
   });
+  void api.project.getProjectsForUser.prefetch(undefined, {
+    staleTime: 1000,
+  });
+  void api.project.getProjectsForUser.prefetch(undefined, {
+    staleTime: 1000,
+  });
 
   return (
     <>

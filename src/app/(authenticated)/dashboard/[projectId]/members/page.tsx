@@ -89,7 +89,7 @@ export default async function ProjectPage({
 
                 <TableRow>
                   <TableCell className="font-medium">
-                    {project.owner.name}
+                    {project.owner?.name}
                   </TableCell>
                   <TableCell>MEMBER</TableCell>
                   <TableCell>
