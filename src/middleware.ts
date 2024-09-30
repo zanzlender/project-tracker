@@ -13,8 +13,12 @@ const ratelimit = new Ratelimit({
 
 const isPublicRoute = createRouteMatcher([
   "/auth(.*)",
-  "/", // Skip Next.js internals and all static files, unless found in search params
+  "/",
   "/api/webhooks(.*)",
+]);
+
+const shouldSkipRouterForRateLimiting = createRouteMatcher([
+  "/(?!(api|trpc).*)", // any router that doesn't start with api or trpc
 ]);
 
 export default clerkMiddleware(async (auth, request, event) => {
@@ -25,9 +29,11 @@ export default clerkMiddleware(async (auth, request, event) => {
   // see https://upstash.com/docs/oss/sdks/ts/ratelimit/gettingstarted#serverless-environments
   event.waitUntil(pending);
 
-  const res = success
-    ? NextResponse.next()
-    : NextResponse.redirect(new URL("/api/blocked", request.url));
+  const res =
+    success || shouldSkipRouterForRateLimiting(request)
+      ? NextResponse.next()
+      : NextResponse.redirect(new URL("/api/blocked", request.url));
+
   res.headers.set("X-RateLimit-Success", success.toString());
   res.headers.set("X-RateLimit-Limit", limit.toString());
   res.headers.set("X-RateLimit-Remaining", remaining.toString());
@@ -42,7 +48,7 @@ export const config = {
   matcher: [
     // Skip Next.js internals and all static files, unless found in search params
     // and /monitoring for Vercel Speed insigts
-    "/((?!_next|monitoring|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
+    "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
     // Always run for API routes
     "/(api|trpc)(.*)",
   ],
