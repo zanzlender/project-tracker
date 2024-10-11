@@ -3,14 +3,14 @@ import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
 import { NextResponse } from "next/server";
 
-const ratelimit = new Ratelimit({
+/* const ratelimit = new Ratelimit({
   redis: Redis.fromEnv(),
   limiter: Ratelimit.fixedWindow(100, "10s"),
   ephemeralCache: new Map(),
   prefix: "@upstash/ratelimit",
   analytics: true,
 });
-
+ */
 const isPublicRoute = createRouteMatcher([
   "/auth(.*)",
   "/",
@@ -18,11 +18,11 @@ const isPublicRoute = createRouteMatcher([
 ]);
 
 const shouldSkipRouterForRateLimiting = createRouteMatcher([
-  "/(?!(api|trpc).*)", // any router that doesn't start with api or trpc
+  "/((?![api|trpc]).*)", // any router that doesn't start with api or trpc
 ]);
 
 export default clerkMiddleware(async (auth, request, event) => {
-  const ip = request.ip ?? "127.0.0.1";
+  /*  const ip = request.ip ?? "127.0.0.1";
   console.log("RUNNING MIDDLEWARE for: ", request.url);
   const { success, pending, limit, remaining } = await ratelimit.limit(ip);
   // we use context.waitUntil since analytics: true.
@@ -36,12 +36,12 @@ export default clerkMiddleware(async (auth, request, event) => {
 
   res.headers.set("X-RateLimit-Success", success.toString());
   res.headers.set("X-RateLimit-Limit", limit.toString());
-  res.headers.set("X-RateLimit-Remaining", remaining.toString());
+  res.headers.set("X-RateLimit-Remaining", remaining.toString()); */
 
   if (!isPublicRoute(request)) {
     auth().protect();
   }
-  return res;
+  /* return res; */
 });
 
 export const config = {
